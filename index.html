@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Costos & Inventario</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-container">
+        <header class="glass-panel">
+            <h1>Calculadora de Costos</h1>
+            <span class="accent-text">Bonitas Creaciones</span>
+            <nav>
+                <button class="nav-btn active" data-target="dashboard">Dashboard</button>
+                <button class="nav-btn" data-target="materials">Materiales</button>
+                <button class="nav-btn" data-target="products">Productos</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Dashboard View -->
+            <section id="dashboard" class="view active">
+                <!-- Resumen General -->
+                <div class="dashboard-section">
+                    <div class="glass-panel">
+                        <h2 class="section-title">Resumen General</h2>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-label">Productos</span>
+                                <span class="stat-value" id="total-products-count">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Ventas Totales</span>
+                                <span class="stat-value success" id="total-sales">$0.00</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Costos Totales</span>
+                                <span class="stat-value" id="total-costs">$0.00</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Ganancia Neta</span>
+                                <span class="stat-value success" id="total-profit">$0.00</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Materiales Bajos</span>
+                                <span class="stat-value warning" id="low-stock-count">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="low-stock-alert"></div>
+
+                <!-- Materiales con Stock Bajo -->
+                <div class="dashboard-section">
+                    <div class="glass-panel">
+                        <h3 class="section-title">Materiales con Stock Bajo</h3>
+                        <ul class="stock-list" id="low-stock-list">
+                            <!-- Populated by JS -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Materiales Más Consumidos -->
+                <div class="dashboard-section">
+                    <div class="glass-panel">
+                        <h3 class="section-title">Materiales Más Consumidos</h3>
+                        <ul class="stock-list" id="top-consumed-list">
+                            <!-- Populated by JS -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Gestión de Datos -->
+                <div class="dashboard-section">
+                    <div class="glass-panel">
+                        <h3 class="section-title">Gestión de Datos</h3>
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
+                            <button id="btn-export-data" class="action-btn secondary">Exportar Datos</button>
+                            <button id="btn-bulk-calculator" class="action-btn primary">Pedidos Grandes</button>
+                            <button id="btn-reset-history" class="action-btn danger">Reiniciar Historial</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Materials View -->
+            <section id="materials" class="view hidden">
+                <div class="glass-panel">
+                    <div class="section-header">
+                        <h2>Mis Materiales</h2>
+                        <div style="display: flex; gap: 12px; align-items: center; flex: 1; justify-content: flex-end;">
+                            <input type="text" id="search-materials" placeholder="Buscar materiales..." style="max-width: 300px;">
+                            <select id="filter-material-category" style="max-width: 200px;">
+                                <option value="all">Todas las categorías</option>
+                                <option value="Telas">Telas</option>
+                                <option value="Cierres">Cierres</option>
+                                <option value="Forros">Forros</option>
+                                <option value="Accesorios">Accesorios</option>
+                                <option value="Hilos">Hilos</option>
+                                <option value="Relleno">Relleno</option>
+                                <option value="Otros">Otros</option>
+                            </select>
+                            <button id="btn-add-material" class="action-btn primary">+ Nuevo Material</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Categoría</th>
+                                    <th>Unidad</th>
+                                    <th>Costo</th>
+                                    <th>Stock</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="materials-list">
+                                <!-- Material rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Products View -->
+            <section id="products" class="view hidden">
+                <div class="glass-panel">
+                    <div class="section-header">
+                        <h2>Mis Productos</h2>
+                        <div style="display: flex; gap: 12px; align-items: center; flex: 1; justify-content: flex-end;">
+                            <input type="text" id="search-products" placeholder="Buscar productos..." style="max-width: 300px;">
+                            <select id="filter-product-category" style="max-width: 200px;">
+                                <option value="all">Todas las categorías</option>
+                                <option value="Cartucheras">Cartucheras</option>
+                                <option value="Neceseres">Neceseres</option>
+                                <option value="Mochilas">Mochilas</option>
+                                <option value="Porta Cosméticos">Porta Cosméticos</option>
+                                <option value="General">General</option>
+                            </select>
+                            <button id="btn-add-product" class="action-btn primary">+ Nuevo Producto</button>
+                        </div>
+                    </div>
+                    <div class="products-grid" id="products-list">
+                        <!-- Product cards will be injected here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-material" class="modal hidden">
+        <div class="modal-content glass-panel">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-material-title">Nuevo Material</h2>
+            <form id="form-material">
+                <input type="hidden" id="material-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" id="material-name" required placeholder="Ej. Cordura...">
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="material-category">
+                            <option value="Telas">Telas</option>
+                            <option value="Hilos">Hilos</option>
+                            <option value="Cordura">Cordura</option>
+                            <option value="Cierres">Cierres</option>
+                            <option value="Forros">Forros</option>
+                            <option value="Accesorios">Accesorios</option>
+                            <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Unidad de Medida</label>
+                        <select id="material-unit">
+                            <option value="m">Metros (m)</option>
+                            <option value="cm">Centímetros (cm)</option>
+                            <option value="m2">Metros Cuadrados (m²)</option>
+                            <option value="cm2">Centímetros Cuadrados (cm²)</option>
+                            <option value="u">Unidades (u)</option>
+                            <option value="kg">Kilogramos (kg)</option>
+                            <option value="g">Gramos (g)</option>
+                            <option value="rollo">Rollos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Factor de Conversión (opcional)</label>
+                        <input type="number" id="material-conversion" step="0.01" placeholder="Ej: 1 rollo = 50m">
+                        <small style="color: var(--text-muted); font-size: 0.8rem;">Si 1 rollo = 50m, ingresa 50</small>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Costo por Unidad ($)</label>
+                        <input type="number" id="material-cost" step="0.01" required placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Stock Inicial</label>
+                        <input type="number" id="material-stock" step="0.01" required placeholder="0.00">
+                    </div>
+                </div>
+                <button type="submit" class="action-btn primary full-width">Guardar Material</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-product" class="modal hidden">
+        <div class="modal-content glass-panel large">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-product-title">Nuevo Producto</h2>
+            <form id="form-product">
+                <input type="hidden" id="product-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nombre del Producto</label>
+                        <input type="text" id="product-name" required placeholder="Ej. Cartuchera Escolar">
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="product-category">
+                            <option value="Escolares">Neceser</option>
+                            <option value="Cosméticos">Cartuchera</option>
+                            <option value="Viaje">Yervero/Azucarera</option>
+                            <option value="Personalizadas">Personalizadas</option>
+                            <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Margen de Ganancia Deseado (%)</label>
+                        <input type="number" id="product-margin" step="1" min="0" placeholder="Ej. 50" value="50">
+                        <small style="color: var(--text-muted); font-size: 0.8rem;">Se calcula si editas el precio</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Precio de Venta ($)</label>
+                        <input type="number" id="product-price" step="0.01" placeholder="Se calcula automáticamente">
+                        <small style="color: var(--text-muted); font-size: 0.8rem;">Editable - el margen se ajustará</small>
+                    </div>
+                </div>
+
+                <h3>Materiales</h3>
+                <div class="recipe-builder">
+                    <div class="form-row">
+                        <select id="recipe-material-select">
+                            <option value="">Seleccionar Material...</option>
+                        </select>
+                        <input type="number" id="recipe-quantity" placeholder="Cantidad" step="0.01">
+                        <button type="button" id="btn-add-ingredient" class="action-btn secondary">Agregar</button>
+                    </div>
+                    <ul id="recipe-list" class="recipe-list">
+                        <!-- Ingredients list -->
+                    </ul>
+                    <div class="cost-summary">
+                        <span>Costo Total: <strong id="product-total-cost">$0.00</strong></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="action-btn primary full-width">Guardar Producto</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bulk Order Calculator Modal -->
+    <div id="modal-bulk" class="modal hidden">
+        <div class="modal-content glass-panel large">
+            <span class="close-modal">&times;</span>
+            <h2>Calculadora de Pedidos Grandes</h2>
+            <div class="form-group">
+                <label>Selecciona el Producto</label>
+                <select id="bulk-product">
+                    <option value="">Seleccionar producto...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Cantidad a Producir</label>
+                <input type="number" id="bulk-quantity" min="1" value="1" placeholder="Ej: 50">
+            </div>
+            <button id="btn-calculate-bulk" class="action-btn primary">Calcular Materiales</button>
+            <div id="bulk-results" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- Export Data Modal -->
+    <div id="modal-export" class="modal hidden">
+        <div class="modal-content glass-panel">
+            <span class="close-modal">&times;</span>
+            <h2>Exportar Datos</h2>
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
+                <button id="btn-export-materials" class="action-btn secondary">📦 Exportar Materiales (CSV)</button>
+                <button id="btn-export-products" class="action-btn secondary">🎒 Exportar Productos (CSV)</button>
+                <button id="btn-export-history" class="action-btn secondary">📊 Exportar Historial (CSV)</button>
+                <button id="btn-export-all" class="action-btn primary">💾 Exportar Todo (JSON)</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

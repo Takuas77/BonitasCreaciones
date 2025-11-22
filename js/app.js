@@ -2,7 +2,8 @@ const App = {
     state: {
         materials: [],
         products: [],
-        currentRecipe: [] // Temporary state for creating/editing product
+        currentRecipe: [], // Temporary state for creating/editing product
+        currentProductImage: '' // Temporary state for product image
     },
 
     init() {
@@ -66,6 +67,28 @@ const App = {
         document.getElementById('form-product').addEventListener('submit', (e) => {
             e.preventDefault();
             this.handleSaveProduct();
+        });
+
+        // Image preview
+        document.getElementById('product-image').addEventListener('change', (e) => {
+            this.handleImageUpload(e);
+        });
+
+        document.getElementById('btn-remove-image').addEventListener('click', () => {
+            this.removeProductImage();
+        });
+
+        // Gallery
+        document.getElementById('btn-view-gallery').addEventListener('click', () => {
+            UI.showGallery(this.state.products);
+        });
+
+        document.getElementById('btn-share-catalog').addEventListener('click', () => {
+            this.shareCatalog();
+        });
+
+        document.getElementById('btn-print-catalog').addEventListener('click', () => {
+            this.printCatalog();
         });
 
         // Search functionality
@@ -284,6 +307,7 @@ const App = {
         const category = document.getElementById('product-category').value;
         const price = parseFloat(document.getElementById('product-price').value) || 0;
         const margin = parseFloat(document.getElementById('product-margin').value) || 50;
+        const image = this.state.currentProductImage || '';
 
         // Calculate total cost
         let totalCost = 0;
@@ -299,10 +323,12 @@ const App = {
             price,
             margin,
             recipe: this.state.currentRecipe,
-            totalCost
+            totalCost,
+            image
         };
 
         this.state.products = Storage.saveProduct(product);
+        this.state.currentProductImage = '';
         UI.hideModal('modal-product');
         this.refreshUI();
     },
@@ -316,6 +342,15 @@ const App = {
             document.getElementById('product-category').value = product.category || 'General';
             document.getElementById('product-price').value = product.price;
             document.getElementById('product-margin').value = product.margin || 50;
+
+            // Load image if exists
+            if (product.image) {
+                this.state.currentProductImage = product.image;
+                document.getElementById('preview-img').src = product.image;
+                document.getElementById('image-preview').style.display = 'block';
+            } else {
+                this.removeProductImage();
+            }
 
             UI.renderRecipeList(this.state.currentRecipe, this.state.materials);
             document.getElementById('modal-product-title').textContent = 'Editar Producto';
@@ -506,6 +541,85 @@ const App = {
                 document.body.removeChild(notification);
             }, 300);
         }, 3000);
+    },
+
+    handleImageUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Validate file size (max 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            alert('La imagen es muy grande. Tamaño máximo: 2MB');
+            e.target.value = '';
+            return;
+        }
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Por favor selecciona una imagen válida');
+            e.target.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            this.state.currentProductImage = event.target.result;
+            document.getElementById('preview-img').src = event.target.result;
+            document.getElementById('image-preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    },
+
+    removeProductImage() {
+        this.state.currentProductImage = '';
+        document.getElementById('product-image').value = '';
+        document.getElementById('image-preview').style.display = 'none';
+        document.getElementById('preview-img').src = '';
+    },
+
+    shareCatalog() {
+        const products = this.state.products.filter(p => p.image);
+        if (products.length === 0) {
+            alert('No hay productos con imágenes para compartir');
+            return;
+        }
+
+        // Generate catalog HTML
+        let catalogHTML = '<html><head><meta charset="UTF-8"><title>Catálogo - Bonitas Creaciones</title>';
+        catalogHTML += '<style>body{font-family:Arial,sans-serif;max-width:1200px;margin:0 auto;padding:20px;background:#f5f5f5}';
+        catalogHTML += 'h1{text-align:center;color:#6366f1;margin-bottom:30px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}';
+        catalogHTML += '.card{background:white;border-radius:12px;padding:15px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}';
+        catalogHTML += '.card img{width:100%;height:250px;object-fit:cover;border-radius:8px;margin-bottom:10px}';
+        catalogHTML += '.card h3{margin:10px 0;color:#333}.card p{margin:5px 0;color:#666}.price{font-size:1.5rem;color:#10b981;font-weight:bold}</style></head><body>';
+        catalogHTML += '<h1>📸 Catálogo de Productos - Bonitas Creaciones</h1><div class="grid">';
+
+        products.forEach(p => {
+            catalogHTML += '<div class="card">';
+            catalogHTML += '<img src="' + p.image + '" alt="' + p.name + '">';
+            catalogHTML += '<h3>' + p.name + '</h3>';
+            catalogHTML += '<p>Categoría: ' + (p.category || 'General') + '</p>';
+            catalogHTML += '<p class="price">$' + p.price.toFixed(2) + '</p>';
+            catalogHTML += '</div>';
+        });
+
+        catalogHTML += '</div></body></html>';
+
+        // Open in new window
+        const win = window.open('', '_blank');
+        win.document.write(catalogHTML);
+        win.document.close();
+    },
+
+    printCatalog() {
+        const products = this.state.products.filter(p => p.image);
+        if (products.length === 0) {
+            alert('No hay productos con imágenes para imprimir');
+            return;
+        }
+        this.shareCatalog();
+        setTimeout(() => {
+            window.print();
+        }, 500);
     }
 };
 

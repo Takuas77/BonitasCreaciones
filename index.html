@@ -151,6 +151,7 @@
                                 <option value="Porta Cosméticos">Porta Cosméticos</option>
                                 <option value="General">General</option>
                             </select>
+                            <button id="btn-view-gallery" class="action-btn secondary">📸 Galería</button>
                             <button id="btn-add-product" class="action-btn primary">+ Nuevo Producto</button>
                         </div>
                     </div>
@@ -245,6 +246,16 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label>Imagen del Producto</label>
+                    <input type="file" id="product-image" accept="image/*">
+                    <div id="image-preview" style="margin-top: 10px; display: none;">
+                        <img id="preview-img" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid var(--glass-border);">
+                        <button type="button" id="btn-remove-image" class="action-btn danger" style="margin-top: 8px; padding: 4px 12px; font-size: 0.85rem;">Eliminar Imagen</button>
+                    </div>
+                    <small style="color: var(--text-muted); font-size: 0.8rem;">Formatos: JPG, PNG, WebP (máx. 2MB)</small>
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label>Margen de Ganancia Deseado (%)</label>
@@ -310,6 +321,21 @@
                 <button id="btn-export-products" class="action-btn secondary">🎒 Exportar Productos (CSV)</button>
                 <button id="btn-export-history" class="action-btn secondary">📊 Exportar Historial (CSV)</button>
                 <button id="btn-export-all" class="action-btn primary">💾 Exportar Todo (JSON)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery Modal -->
+    <div id="modal-gallery" class="modal hidden">
+        <div class="modal-content glass-panel large">
+            <span class="close-modal">&times;</span>
+            <h2>📸 Galería de Productos</h2>
+            <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                <button id="btn-share-catalog" class="action-btn primary">📤 Compartir Catálogo</button>
+                <button id="btn-print-catalog" class="action-btn secondary">🖨️ Imprimir Catálogo</button>
+            </div>
+            <div id="gallery-grid" class="gallery-grid">
+                <!-- Product images will be injected here -->
             </div>
         </div>
     </div>

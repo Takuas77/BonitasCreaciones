@@ -111,6 +111,14 @@ const UI = {
             const desiredMargin = product.margin || 'N/A';
             const category = product.category || 'General';
             
+            // Add image if exists
+            if (product.image) {
+                const imgDiv = document.createElement('div');
+                imgDiv.className = 'product-image';
+                imgDiv.innerHTML = '<img src="' + product.image + '" alt="' + product.name + '" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 12px;">';
+                card.appendChild(imgDiv);
+            }
+            
             const header = document.createElement('div');
             header.className = 'product-header';
             header.innerHTML = '<div><span class="product-title">' + product.name + '</span><span class="category-badge" style="font-size: 0.75rem; margin-left: 8px;">' + category + '</span></div><span class="product-cost">Costo: $' + cost + '</span>';
@@ -262,5 +270,25 @@ const UI = {
             select.appendChild(option);
         }
         this.showModal('modal-bulk');
+    },
+
+    showGallery(products) {
+        const gallery = document.getElementById('gallery-grid');
+        gallery.innerHTML = '';
+        
+        const productsWithImages = products.filter(p => p.image);
+        
+        if (productsWithImages.length === 0) {
+            gallery.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted); grid-column: 1/-1;"><p>No hay productos con imágenes aún</p><p style="margin-top: 10px; font-size: 0.9rem;">Agrega imágenes a tus productos para crear tu catálogo visual</p></div>';
+        } else {
+            productsWithImages.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'gallery-item';
+                card.innerHTML = '<img src="' + product.image + '" alt="' + product.name + '"><div class="gallery-info"><h4>' + product.name + '</h4><p>' + (product.category || 'General') + '</p><p class="price">$' + product.price.toFixed(2) + '</p></div>';
+                gallery.appendChild(card);
+            });
+        }
+        
+        this.showModal('modal-gallery');
     }
 };

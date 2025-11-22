@@ -24,6 +24,9 @@ Aplicación web para gestión de costos, producción e inventario de un micro-em
 ### 🎒 Gestión de Productos
 - **Crear/Editar/Eliminar productos**
 - **Categorías**: Cartucheras, Neceseres, Mochilas, Porta Cosméticos, General
+- **Imágenes de productos**: Sube fotos de cada producto (máx. 2MB)
+- **Galería visual**: Vista de catálogo con todas las imágenes
+- **Compartir catálogo**: Genera catálogo HTML para compartir con clientes
 - **Receta de materiales**: Define qué materiales y cantidades se necesitan para cada producto
 - **Cálculo automático de costos**: Suma automática del costo de todos los materiales
 - **Precios flexibles**: 
@@ -33,6 +36,14 @@ Aplicación web para gestión de costos, producción e inventario de un micro-em
 - **Sin límite de margen**: Configura el margen de ganancia que necesites
 - **Búsqueda rápida**: Filtrar productos por nombre
 - **Filtro por categoría**: Ver solo productos de una categoría específica
+
+### 📸 Galería y Catálogo
+- **Subir imágenes**: Formatos JPG, PNG, WebP (máximo 2MB por imagen)
+- **Vista previa**: Ve la imagen antes de guardar
+- **Galería de productos**: Vista tipo grid con todas las imágenes
+- **Catálogo compartible**: Genera catálogo HTML con imágenes y precios
+- **Impresión**: Imprime el catálogo directamente
+- **Imágenes en tarjetas**: Las fotos se muestran en las tarjetas de productos
 
 ### 🏭 Producción
 - **Registro de producción**: Ingresa cuántas unidades producir

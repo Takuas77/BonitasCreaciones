@@ -110,7 +110,7 @@ const UI = {
             const actualMargin = hasPrice ? (((product.price - product.totalCost) / product.totalCost) * 100).toFixed(1) : 0;
             const desiredMargin = product.margin || 'N/A';
             const category = product.category || 'General';
-            
+
             // Add image if exists
             if (product.image) {
                 const imgDiv = document.createElement('div');
@@ -118,20 +118,20 @@ const UI = {
                 imgDiv.innerHTML = '<img src="' + product.image + '" alt="' + product.name + '" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 12px;">';
                 card.appendChild(imgDiv);
             }
-            
+
             const header = document.createElement('div');
             header.className = 'product-header';
             header.innerHTML = '<div><span class="product-title">' + product.name + '</span><span class="category-badge" style="font-size: 0.75rem; margin-left: 8px;">' + category + '</span></div><span class="product-cost">Costo: $' + cost + '</span>';
-            
+
             const priceDiv = document.createElement('div');
             priceDiv.className = 'product-price';
             priceDiv.textContent = price;
-            
+
             const marginDiv = document.createElement('div');
             marginDiv.style.cssText = 'font-size: 0.85rem; color: var(--text-muted); margin: 8px 0;';
             marginDiv.innerHTML = '<div>Ganancia: <strong style="color: var(--success);">$' + profit + '</strong></div>' +
-                                '<div>Margen real: <strong>' + actualMargin + '%</strong> | Configurado: <strong>' + desiredMargin + '%</strong></div>';
-            
+                '<div>Margen real: <strong>' + actualMargin + '%</strong> | Configurado: <strong>' + desiredMargin + '%</strong></div>';
+
             const actions = document.createElement('div');
             actions.className = 'product-actions';
             actions.innerHTML = '<button class="action-btn primary produce-btn" data-id="' + product.id + '">Producir</button><button class="action-btn secondary edit-btn" data-id="' + product.id + '">Editar</button><button class="action-btn danger delete-btn" data-id="' + product.id + '">Eliminar</button>';
@@ -143,8 +143,13 @@ const UI = {
         });
     },
 
-    renderDashboardMetrics(materials) {
-        const history = Storage.getHistory();
+    renderDashboardMetrics(materials, history = []) {
+        // If history is not passed, try to get it from storage (fallback, though deprecated in new flow)
+        if (!history || history.length === 0) {
+            // In async flow, we expect history to be passed. If not, we show 0.
+            // We avoid calling Storage.getHistory() here to prevent async issues in sync render.
+        }
+
         let sales = 0;
         let costs = 0;
         const consumptionMap = {};
@@ -182,8 +187,8 @@ const UI = {
         }
     },
 
-    renderMaterials(materials) {
-        this.renderDashboardMetrics(materials);
+    renderMaterials(materials, history = []) {
+        this.renderDashboardMetrics(materials, history);
         this.elements.materialsList.innerHTML = '';
         this.elements.recipeSelect.innerHTML = '<option value="">Seleccionar Material...</option>';
         if (this.elements.lowStockList) this.elements.lowStockList.innerHTML = '';
@@ -275,9 +280,9 @@ const UI = {
     showGallery(products) {
         const gallery = document.getElementById('gallery-grid');
         gallery.innerHTML = '';
-        
+
         const productsWithImages = products.filter(p => p.image);
-        
+
         if (productsWithImages.length === 0) {
             gallery.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted); grid-column: 1/-1;"><p>No hay productos con imágenes aún</p><p style="margin-top: 10px; font-size: 0.9rem;">Agrega imágenes a tus productos para crear tu catálogo visual</p></div>';
         } else {
@@ -288,7 +293,7 @@ const UI = {
                 gallery.appendChild(card);
             });
         }
-        
+
         this.showModal('modal-gallery');
     }
 };

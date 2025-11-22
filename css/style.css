@@ -756,3 +756,22 @@ small {
 .product-card:hover .product-image img {
     transform: scale(1.05);
 }
+/* Recipe Builder - Scrollable List */
+.recipe-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin: 16px 0;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 8px;
+}
+
+/* Modal Content - Scrollable */
+.modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-content .glass-panel {
+    max-height: none;
+}

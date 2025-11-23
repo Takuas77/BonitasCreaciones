@@ -152,6 +152,12 @@ const UI = {
     },
 
     renderProducts(products, materials) {
+        console.log('🎨 renderProducts llamado:', {
+            productos: products.length,
+            materiales: materials.length,
+            elementoExiste: !!this.elements.productsList
+        });
+        
         if (!this.elements.productsList) return; // Salir si no está en la vista de productos
         
         this.elements.productsList.innerHTML = '';
@@ -250,6 +256,12 @@ const UI = {
 
     renderMaterials(materials, history = []) {
         this.renderDashboardMetrics(materials, history);
+        
+        console.log('🎨 renderMaterials llamado:', {
+            materiales: materials.length,
+            historial: history.length,
+            elementoExiste: !!this.elements.materialsList
+        });
         
         if (!this.elements.materialsList) return; // Salir si no está en la vista de materiales
         
@@ -387,7 +399,13 @@ const UI = {
     },
 
     renderSales(sales) {
+        console.log('🎨 renderSales llamado:', {
+            ventas: sales.length
+        });
+        
         const salesList = document.getElementById('sales-list');
+        console.log('🔍 Elemento sales-list existe:', !!salesList);
+        
         if (!salesList) return;
 
         if (sales.length === 0) {

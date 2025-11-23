@@ -59,6 +59,14 @@ const App = {
      * @param {string} viewName - Nombre de la vista cargada
      */
     refreshCurrentView(viewName) {
+        console.log('🔄 refreshCurrentView llamado para:', viewName);
+        console.log('📊 Estado actual:', {
+            materials: this.state.materials.length,
+            products: this.state.products.length,
+            sales: this.state.sales.length,
+            history: this.state.history.length
+        });
+        
         // Actualizar referencias de elementos en UI
         UI.refreshElementReferences();
         
@@ -71,12 +79,17 @@ const App = {
                 // Solo métricas generales, no renderizar materiales ni productos aquí
                 break;
             case 'materials':
+                console.log('🎨 Renderizando materiales...', this.state.materials.length);
+                console.log('🔍 Elemento materials-list existe:', !!UI.elements.materialsList);
                 UI.renderMaterials(this.state.materials, this.state.history);
                 break;
             case 'products':
+                console.log('🎨 Renderizando productos...', this.state.products.length);
+                console.log('🔍 Elemento products-list existe:', !!UI.elements.productsList);
                 UI.renderProducts(this.state.products, this.state.materials);
                 break;
             case 'sales':
+                console.log('🎨 Renderizando ventas...', this.state.sales.length);
                 UI.renderSales(this.state.sales);
                 break;
         }

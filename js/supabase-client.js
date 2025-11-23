@@ -48,26 +48,48 @@ const SupabaseClient = {
     },
 
     showNotification(message, type = 'info') {
+        // Crear contenedor de notificaciones si no existe
+        let container = document.getElementById('notifications-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'notifications-container';
+            container.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                pointer-events: none;
+            `;
+            document.body.appendChild(container);
+        }
+
         const notification = document.createElement('div');
         notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
             background: ${type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#6366f1')};
             color: white;
             padding: 16px 24px;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            z-index: 10000;
             animation: slideIn 0.3s ease;
-            max-width: 400px;
+            pointer-events: auto;
+            max-width: 350px;
+            word-wrap: break-word;
         `;
         notification.textContent = message;
-        document.body.appendChild(notification);
+        container.appendChild(notification);
 
         setTimeout(() => {
             notification.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => notification.remove(), 300);
+            setTimeout(() => {
+                notification.remove();
+                // Limpiar contenedor si está vacío
+                if (container.children.length === 0) {
+                    container.remove();
+                }
+            }, 300);
         }, 4000);
     },
 

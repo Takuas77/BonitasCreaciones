@@ -439,10 +439,33 @@
     },
 
     showMessage(message, type = 'info') {
+        // Crear contenedor de notificaciones si no existe
+        let container = document.getElementById('notifications-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'notifications-container';
+            container.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                pointer-events: none;
+            `;
+            document.body.appendChild(container);
+        }
+
         const notification = document.createElement('div');
         notification.className = 'notification notification-' + type;
+        notification.style.cssText = `
+            pointer-events: auto;
+            max-width: 350px;
+            word-wrap: break-word;
+        `;
         notification.textContent = message;
-        document.body.appendChild(notification);
+        container.appendChild(notification);
 
         setTimeout(() => {
             notification.classList.add('show');
@@ -451,7 +474,11 @@
         setTimeout(() => {
             notification.classList.remove('show');
             setTimeout(() => {
-                document.body.removeChild(notification);
+                notification.remove();
+                // Limpiar contenedor si está vacío
+                if (container.children.length === 0) {
+                    container.remove();
+                }
             }, 300);
         }, 3000);
     }

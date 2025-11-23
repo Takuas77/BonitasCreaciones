@@ -43,9 +43,6 @@ const ViewLoader = {
      */
     async loadView(viewName, showLoader = true) {
         try {
-            console.log(`📂 Cargando vista: ${viewName}`);
-            console.trace('Stack trace de loadView');
-            
             if (showLoader) this.showLoadingIndicator();
 
             // Verificar si está en caché
@@ -93,12 +90,9 @@ const ViewLoader = {
 
         // Remover clase hidden de la vista que se acaba de cargar
         const viewElement = this.containers.views.querySelector('.view');
-        console.log(`🔍 Renderizando vista ${viewName}:`, viewElement);
-        console.log(`🔍 Clases de la vista:`, viewElement?.className);
         
         if (viewElement && viewElement.classList.contains('hidden')) {
             viewElement.classList.remove('hidden');
-            console.log(`✅ Clase 'hidden' removida de ${viewName}`);
         }
 
         // Disparar evento personalizado para que otros módulos sepan que la vista cambió

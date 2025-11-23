@@ -448,13 +448,13 @@
             return;
         }
         
-        // Cargar vista del dashboard
-        await this.loadInitialView();
-        
-        // Inicializar la aplicación si no ha sido inicializada
+        // Inicializar la aplicación primero (para cargar datos)
         if (typeof App !== 'undefined' && App.init) {
             await App.init();
         }
+        
+        // Luego cargar vista del dashboard con datos ya cargados
+        await this.loadInitialView();
     },
 
     async loadInitialView() {

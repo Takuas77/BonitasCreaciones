@@ -88,15 +88,18 @@ const ViewLoader = {
         // Limpiar contenedor de vistas
         this.containers.views.innerHTML = html;
 
-        // Remover clase hidden de la vista que se acaba de cargar
+        // Obtener la vista que se acaba de cargar
         const viewElement = this.containers.views.querySelector('.view');
         
         console.log('🔍 ViewElement encontrado:', !!viewElement);
         console.log('🔍 Clases antes:', viewElement?.className);
         
-        if (viewElement && viewElement.classList.contains('hidden')) {
+        if (viewElement) {
+            // Remover clase hidden si existe
             viewElement.classList.remove('hidden');
-            console.log('✅ Clase hidden removida');
+            // Agregar clase active para mostrar la vista
+            viewElement.classList.add('active');
+            console.log('✅ Clase hidden removida y active agregada');
         }
         
         console.log('🔍 Clases después:', viewElement?.className);

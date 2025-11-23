@@ -123,11 +123,12 @@ const UI = {
             const desiredMargin = product.margin || 'N/A';
             const category = product.category || 'General';
 
-            // Add image if exists
-            if (product.image) {
+            // Add image if exists - priorizar image_url de Supabase Storage
+            const imgUrl = product.image_url || product.image;
+            if (imgUrl) {
                 const imgDiv = document.createElement('div');
                 imgDiv.className = 'product-image';
-                imgDiv.innerHTML = '<img src="' + product.image + '" alt="' + product.name + '" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 12px;">';
+                imgDiv.innerHTML = '<img src="' + imgUrl + '" alt="' + product.name + '" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 12px;">';
                 card.appendChild(imgDiv);
             }
 
@@ -209,7 +210,18 @@ const UI = {
             const row = document.createElement('tr');
             const stockBadge = material.stock < 5 ? 'low' : 'ok';
             const categoryBadge = material.category || 'Otros';
-            row.innerHTML = '<td>' + material.name + '</td><td><span class="category-badge">' + categoryBadge + '</span></td><td>' + material.unit + '</td><td>$' + parseFloat(material.cost).toFixed(2) + '</td><td><span class="stock-badge ' + stockBadge + '">' + parseFloat(material.stock).toFixed(2) + '</span></td><td><button class="action-btn secondary edit-btn" data-id="' + material.id + '">✏️</button><button class="action-btn danger delete-btn" data-id="' + material.id + '">🗑️</button></td>';
+            
+            // Construir HTML con imagen si existe
+            let materialNameHtml = material.name;
+            const imgUrl = material.image_url || material.image;
+            if (imgUrl) {
+                materialNameHtml = `<div style="display: flex; align-items: center; gap: 8px;">
+                    <img src="${imgUrl}" alt="${material.name}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                    <span>${material.name}</span>
+                </div>`;
+            }
+            
+            row.innerHTML = '<td>' + materialNameHtml + '</td><td><span class="category-badge">' + categoryBadge + '</span></td><td>' + material.unit + '</td><td>$' + parseFloat(material.cost).toFixed(2) + '</td><td><span class="stock-badge ' + stockBadge + '">' + parseFloat(material.stock).toFixed(2) + '</span></td><td><button class="action-btn secondary edit-btn" data-id="' + material.id + '">✏️</button><button class="action-btn danger delete-btn" data-id="' + material.id + '">🗑️</button></td>';
             this.elements.materialsList.appendChild(row);
             const option = document.createElement('option');
             option.value = material.id;
@@ -292,7 +304,7 @@ const UI = {
         const gallery = document.getElementById('gallery-grid');
         gallery.innerHTML = '';
 
-        const productsWithImages = products.filter(p => p.image);
+        const productsWithImages = products.filter(p => p.image || p.image_url);
 
         if (productsWithImages.length === 0) {
             gallery.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted); grid-column: 1/-1;"><p>No hay productos con imágenes aún</p><p style="margin-top: 10px; font-size: 0.9rem;">Agrega imágenes a tus productos para crear tu catálogo visual</p></div>';
@@ -300,7 +312,8 @@ const UI = {
             productsWithImages.forEach(product => {
                 const card = document.createElement('div');
                 card.className = 'gallery-item';
-                card.innerHTML = '<img src="' + product.image + '" alt="' + product.name + '"><div class="gallery-info"><h4>' + product.name + '</h4><p>' + (product.category || 'General') + '</p><p class="price">$' + product.price.toFixed(2) + '</p></div>';
+                const imgUrl = product.image_url || product.image;
+                card.innerHTML = '<img src="' + imgUrl + '" alt="' + product.name + '"><div class="gallery-info"><h4>' + product.name + '</h4><p>' + (product.category || 'General') + '</p><p class="price">$' + product.price.toFixed(2) + '</p></div>';
                 gallery.appendChild(card);
             });
         }

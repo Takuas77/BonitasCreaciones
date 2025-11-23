@@ -6,7 +6,12 @@ const App = {
         products: [],
         history: [], // Added history to state
         currentRecipe: [], // Temporary state for creating/editing product
-        currentProductImage: '' // Temporary state for product image
+        currentProductImage: '', // Temporary state for product image
+        currentProductImageFile: null, // Archivo de imagen temporal para productos
+        currentProductImagePath: '', // Ruta de la imagen en Storage para eliminar si se reemplaza
+        currentMaterialImage: '', // Temporary state for material image
+        currentMaterialImageFile: null, // Archivo de imagen temporal para materiales
+        currentMaterialImagePath: '' // Ruta de la imagen en Storage para eliminar si se reemplaza
     },
 
     async init() {
@@ -111,12 +116,27 @@ const App = {
 
         // Image preview
         document.getElementById('product-image').addEventListener('change', (e) => {
-            this.handleImageUpload(e);
+            this.handleImageUpload(e, 'product');
         });
 
         document.getElementById('btn-remove-image').addEventListener('click', () => {
             this.removeProductImage();
         });
+
+        // Material Image preview
+        const materialImageInput = document.getElementById('material-image');
+        if (materialImageInput) {
+            materialImageInput.addEventListener('change', (e) => {
+                this.handleImageUpload(e, 'material');
+            });
+        }
+
+        const btnRemoveMaterialImage = document.getElementById('btn-remove-material-image');
+        if (btnRemoveMaterialImage) {
+            btnRemoveMaterialImage.addEventListener('click', () => {
+                this.removeMaterialImage();
+            });
+        }
 
         // Gallery
         document.getElementById('btn-view-gallery').addEventListener('click', () => {
@@ -231,6 +251,9 @@ const App = {
         const stock = parseFloat(document.getElementById('material-stock').value);
         const conversion = parseFloat(document.getElementById('material-conversion').value) || 1;
 
+        let imageUrl = this.state.currentMaterialImage || '';
+        let imagePath = this.state.currentMaterialImagePath || '';
+
         // Validación #5: Valores negativos
         if (cost < 0 || stock < 0 || conversion < 0) {
             alert('❌ Los valores no pueden ser negativos.\n\nPor favor ingresa valores válidos.');
@@ -246,11 +269,49 @@ const App = {
             return;
         }
 
-        const material = { id, name, category, unit, cost, stock, conversion_factor: conversion };
+        // Si hay un archivo de imagen nuevo, subirlo a Supabase Storage
+        if (this.state.currentMaterialImageFile && Auth.currentUser) {
+            const uploadResult = await SupabaseStorage.uploadImage(
+                this.state.currentMaterialImageFile,
+                'materials',
+                Auth.currentUser.id
+            );
+
+            if (uploadResult) {
+                // Si se subió exitosamente, eliminar la imagen anterior si existe
+                if (imagePath) {
+                    await SupabaseStorage.deleteImage(imagePath);
+                }
+                imageUrl = uploadResult.url;
+                imagePath = uploadResult.path;
+            } else {
+                // Si falla la subida a Supabase, usar Base64 como fallback
+                if (this.state.currentMaterialImageFile) {
+                    imageUrl = await SupabaseStorage.fileToBase64(this.state.currentMaterialImageFile);
+                    imagePath = ''; // No hay path en Storage
+                }
+            }
+        }
+
+        const material = { 
+            id, 
+            name, 
+            category, 
+            unit, 
+            cost, 
+            stock, 
+            conversion_factor: conversion,
+            image_url: imageUrl,
+            image_path: imagePath
+        };
 
         try {
             this.state.materials = await Storage.saveMaterial(material);
             await this.updateProductCosts(id);
+            // Limpiar estado temporal
+            this.state.currentMaterialImage = '';
+            this.state.currentMaterialImageFile = null;
+            this.state.currentMaterialImagePath = '';
             UI.hideModal('modal-material');
             this.refreshUI();
             this.showNotification('Material guardado correctamente', 'success');
@@ -352,6 +413,24 @@ const App = {
             document.getElementById('material-stock').value = material.stock;
             document.getElementById('material-conversion').value = material.conversion_factor || 1;
 
+            // Load image if exists
+            const imgUrl = material.image_url || '';
+            const imgPath = material.image_path || '';
+            
+            if (imgUrl) {
+                this.state.currentMaterialImage = imgUrl;
+                this.state.currentMaterialImagePath = imgPath;
+                this.state.currentMaterialImageFile = null;
+                const previewImg = document.getElementById('material-preview-img');
+                const imagePreview = document.getElementById('material-image-preview');
+                if (previewImg && imagePreview) {
+                    previewImg.src = imgUrl;
+                    imagePreview.style.display = 'block';
+                }
+            } else {
+                this.removeMaterialImage();
+            }
+
             document.getElementById('modal-material-title').textContent = 'Editar Material';
             UI.showModal('modal-material');
         }
@@ -436,7 +515,9 @@ const App = {
         const category = document.getElementById('product-category').value;
         const price = parseFloat(document.getElementById('product-price').value) || 0;
         const margin = parseFloat(document.getElementById('product-margin').value) || 50;
-        const image = this.state.currentProductImage || '';
+        
+        let imageUrl = this.state.currentProductImage || '';
+        let imagePath = this.state.currentProductImagePath || '';
 
         // Validación 3: Producto sin materiales
         if (this.state.currentRecipe.length === 0) {
@@ -472,6 +553,30 @@ const App = {
             if (!shouldContinue) return;
         }
 
+        // Si hay un archivo de imagen nuevo, subirlo a Supabase Storage
+        if (this.state.currentProductImageFile && Auth.currentUser) {
+            const uploadResult = await SupabaseStorage.uploadImage(
+                this.state.currentProductImageFile,
+                'products',
+                Auth.currentUser.id
+            );
+
+            if (uploadResult) {
+                // Si se subió exitosamente, eliminar la imagen anterior si existe
+                if (imagePath) {
+                    await SupabaseStorage.deleteImage(imagePath);
+                }
+                imageUrl = uploadResult.url;
+                imagePath = uploadResult.path;
+            } else {
+                // Si falla la subida a Supabase, usar Base64 como fallback
+                if (this.state.currentProductImageFile) {
+                    imageUrl = await SupabaseStorage.fileToBase64(this.state.currentProductImageFile);
+                    imagePath = ''; // No hay path en Storage
+                }
+            }
+        }
+
         const product = {
             id,
             name,
@@ -480,14 +585,19 @@ const App = {
             margin,
             recipe: this.state.currentRecipe,
             totalCost,
-            image_url: image // Map image to image_url for Supabase schema consistency (though we store base64 here for now)
+            image_url: imageUrl,
+            image_path: imagePath // Guardar path para poder eliminar después
         };
-        // For local compatibility, we might want to keep 'image' property too or handle it in UI
-        product.image = image;
+        
+        // Para compatibilidad local, mantener también 'image'
+        product.image = imageUrl;
 
         try {
             this.state.products = await Storage.saveProduct(product);
+            // Limpiar estado temporal
             this.state.currentProductImage = '';
+            this.state.currentProductImageFile = null;
+            this.state.currentProductImagePath = '';
             UI.hideModal('modal-product');
             this.refreshUI();
             this.showNotification('Producto guardado correctamente', 'success');
@@ -508,8 +618,12 @@ const App = {
 
             // Load image if exists
             const imgUrl = product.image || product.image_url;
+            const imgPath = product.image_path || '';
+            
             if (imgUrl) {
                 this.state.currentProductImage = imgUrl;
+                this.state.currentProductImagePath = imgPath;
+                this.state.currentProductImageFile = null; // No hay archivo nuevo al editar
                 document.getElementById('preview-img').src = imgUrl;
                 document.getElementById('image-preview').style.display = 'block';
             } else {
@@ -718,7 +832,7 @@ const App = {
         }
     },
 
-    handleImageUpload(e) {
+    handleImageUpload(e, type = 'product') {
         const file = e.target.files[0];
         if (!file) return;
 
@@ -736,20 +850,57 @@ const App = {
             return;
         }
 
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            this.state.currentProductImage = event.target.result;
-            document.getElementById('preview-img').src = event.target.result;
-            document.getElementById('image-preview').style.display = 'block';
-        };
-        reader.readAsDataURL(file);
+        if (type === 'product') {
+            // Guardar el archivo para subir después
+            this.state.currentProductImageFile = file;
+
+            // Mostrar preview
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                this.state.currentProductImage = event.target.result;
+                document.getElementById('preview-img').src = event.target.result;
+                document.getElementById('image-preview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else if (type === 'material') {
+            // Guardar el archivo para subir después
+            this.state.currentMaterialImageFile = file;
+
+            // Mostrar preview
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                this.state.currentMaterialImage = event.target.result;
+                const previewImg = document.getElementById('material-preview-img');
+                const imagePreview = document.getElementById('material-image-preview');
+                if (previewImg && imagePreview) {
+                    previewImg.src = event.target.result;
+                    imagePreview.style.display = 'block';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
     },
 
     removeProductImage() {
         this.state.currentProductImage = '';
+        this.state.currentProductImageFile = null;
+        // No eliminamos currentProductImagePath aquí porque se necesita para eliminar en Storage
         document.getElementById('product-image').value = '';
         document.getElementById('image-preview').style.display = 'none';
         document.getElementById('preview-img').src = '';
+    },
+
+    removeMaterialImage() {
+        this.state.currentMaterialImage = '';
+        this.state.currentMaterialImageFile = null;
+        // No eliminamos currentMaterialImagePath aquí porque se necesita para eliminar en Storage
+        const materialImageInput = document.getElementById('material-image');
+        const previewImg = document.getElementById('material-preview-img');
+        const imagePreview = document.getElementById('material-image-preview');
+        
+        if (materialImageInput) materialImageInput.value = '';
+        if (imagePreview) imagePreview.style.display = 'none';
+        if (previewImg) previewImg.src = '';
     },
 
     shareCatalog() {

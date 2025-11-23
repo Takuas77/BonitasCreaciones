@@ -45,6 +45,8 @@ const Storage = {
     },
     
     async saveMaterial(material) {
+        console.log('💾 Guardando material:', material.name, 'ID:', material.id);
+        
         // Guardar en Supabase si está habilitado
         if (this.useSupabase) {
             try {
@@ -54,9 +56,12 @@ const Storage = {
                     updated_at: new Date().toISOString()
                 };
 
-                const { error } = await supabaseClient
+                console.log('📤 Enviando a Supabase:', materialData);
+                
+                const { data, error } = await supabaseClient
                     .from('materials')
-                    .upsert(materialData, { onConflict: 'id' });
+                    .upsert(materialData, { onConflict: 'id' })
+                    .select();
 
                 if (error) {
                     console.error('Error saving to Supabase:', error);
@@ -64,9 +69,14 @@ const Storage = {
                     return this.saveMaterialLocal(material);
                 }
                 
+                console.log('✅ Respuesta de Supabase:', data);
+                
                 // También guardar localmente como cache
                 this.saveMaterialLocal(material);
-                return await this.getMaterials();
+                
+                const allMaterials = await this.getMaterials();
+                console.log('📦 Total de materiales después de guardar:', allMaterials.length);
+                return allMaterials;
             } catch (error) {
                 console.error('Supabase error:', error);
                 return this.saveMaterialLocal(material);
@@ -185,6 +195,8 @@ const Storage = {
     },
     
     async saveProduct(product) {
+        console.log('💾 Guardando producto:', product.name, 'ID:', product.id);
+        
         if (this.useSupabase) {
             try {
                 // Preparar datos para Supabase (solo campos que existen en la tabla)
@@ -200,6 +212,8 @@ const Storage = {
                     updated_at: new Date().toISOString()
                 };
 
+                console.log('📤 Enviando producto a Supabase:', productData);
+
                 // Usar upsert sin onConflict (usa PRIMARY KEY automáticamente)
                 const { data, error } = await supabaseClient
                     .from('products')
@@ -212,9 +226,12 @@ const Storage = {
                     return this.saveProductLocal(product);
                 }
                 
-                console.log('✓ Producto guardado en Supabase:', data);
+                console.log('✅ Producto guardado en Supabase:', data);
                 this.saveProductLocal(product); // También guardar localmente como backup
-                return await this.getProducts();
+                
+                const allProducts = await this.getProducts();
+                console.log('📦 Total de productos después de guardar:', allProducts.length);
+                return allProducts;
             } catch (error) {
                 console.error('Supabase error:', error);
                 return this.saveProductLocal(product);

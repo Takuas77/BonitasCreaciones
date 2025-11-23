@@ -53,7 +53,19 @@ const App = {
 
         document.getElementById('form-material').addEventListener('submit', async (e) => {
             e.preventDefault();
-            await this.handleSaveMaterial();
+            
+            // Prevenir doble submit
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            if (submitBtn.disabled) return;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Guardando...';
+            
+            try {
+                await this.handleSaveMaterial();
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Guardar Material';
+            }
         });
 
         // Product Form
@@ -85,7 +97,19 @@ const App = {
 
         document.getElementById('form-product').addEventListener('submit', async (e) => {
             e.preventDefault();
-            await this.handleSaveProduct();
+            
+            // Prevenir doble submit
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            if (submitBtn.disabled) return;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Guardando...';
+            
+            try {
+                await this.handleSaveProduct();
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Guardar Producto';
+            }
         });
 
         // Image preview

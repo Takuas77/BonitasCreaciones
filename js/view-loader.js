@@ -199,6 +199,10 @@ const ViewLoader = {
 
             this.containers.auth.innerHTML = html;
             console.log('✅ Vista de autenticación cargada');
+            
+            // Disparar evento para que Auth pueda configurar listeners
+            document.dispatchEvent(new CustomEvent('authViewLoaded'));
+            
             return true;
 
         } catch (error) {

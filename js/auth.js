@@ -7,11 +7,15 @@
 
     async init() {
         this.useSupabase = SUPABASE_CONFIG.useSupabase && supabaseClient !== null;
-
-        if (!this.listenersInitialized) {
-            this.setupAuthListeners();
-            this.listenersInitialized = true;
-        }
+        
+        // Escuchar cuando la vista de auth se carga para configurar listeners
+        document.addEventListener('authViewLoaded', () => {
+            if (!this.listenersInitialized) {
+                console.log('🔧 Configurando listeners de autenticación...');
+                this.setupAuthListeners();
+                this.listenersInitialized = true;
+            }
+        }, { once: true }); // Solo una vez
         
         await this.checkAuthState();
     },
@@ -82,9 +86,12 @@
     },
 
     setupAuthListeners() {
+        console.log('📋 setupAuthListeners llamado');
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');
         const showRegister = document.getElementById('show-register');
+        
+        console.log('Elementos encontrados:', { loginForm, registerForm, showRegister });
         
         if (loginForm) {
             loginForm.addEventListener('submit', (e) => {

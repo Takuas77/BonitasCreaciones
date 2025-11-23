@@ -5,47 +5,204 @@ const Storage = {
         HISTORY: 'cost_calculator_history',
         PRICE_HISTORY: 'cost_calculator_price_history'
     },
-    getMaterials() {
+
+    // Verificar si Supabase está habilitado y el usuario autenticado
+    get useSupabase() {
+        return SUPABASE_CONFIG.useSupabase && 
+               supabaseClient && 
+               Auth && 
+               Auth.currentUser;
+    },
+
+    // Materials
+    async getMaterials() {
+        if (this.useSupabase) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('materials')
+                    .select('*')
+                    .eq('user_id', Auth.currentUser.id);
+                
+                if (error) {
+                    console.error('Error loading materials from Supabase:', error);
+                    return this.getMaterialsLocal();
+                }
+                return data || [];
+            } catch (error) {
+                console.error('Supabase connection error:', error);
+                return this.getMaterialsLocal();
+            }
+        }
+        return this.getMaterialsLocal();
+    },
+
+    getMaterialsLocal() {
         const data = localStorage.getItem(this.KEYS.MATERIALS);
         return data ? JSON.parse(data) : [];
     },
-    saveMaterial(material) {
-        const materials = this.getMaterials();
+    
+    async saveMaterial(material) {
+        // Guardar en Supabase si está habilitado
+        if (this.useSupabase) {
+            try {
+                const materialData = {
+                    ...material,
+                    user_id: Auth.currentUser.id,
+                    updated_at: new Date().toISOString()
+                };
+
+                const { error } = await supabaseClient
+                    .from('materials')
+                    .upsert(materialData, { onConflict: 'id' });
+
+                if (error) {
+                    console.error('Error saving to Supabase:', error);
+                    // Fallback a localStorage
+                    return this.saveMaterialLocal(material);
+                }
+                
+                // También guardar localmente como cache
+                this.saveMaterialLocal(material);
+                return await this.getMaterials();
+            } catch (error) {
+                console.error('Supabase error:', error);
+                return this.saveMaterialLocal(material);
+            }
+        }
+        
+        return this.saveMaterialLocal(material);
+    },
+
+    saveMaterialLocal(material) {
+        const materials = this.getMaterialsLocal();
         const index = materials.findIndex(m => m.id === material.id);
+        
         if (index >= 0 && materials[index].cost !== material.cost) {
             this.addPriceHistory(material.id, material.name, materials[index].cost, material.cost);
         }
+        
         if (index >= 0) {
             materials[index] = material;
         } else {
             materials.push(material);
         }
+        
         localStorage.setItem(this.KEYS.MATERIALS, JSON.stringify(materials));
         return materials;
     },
-    deleteMaterial(id) {
-        let materials = this.getMaterials();
+    
+    async deleteMaterial(id) {
+        if (this.useSupabase) {
+            try {
+                const { error } = await supabaseClient
+                    .from('materials')
+                    .delete()
+                    .eq('id', id)
+                    .eq('user_id', Auth.currentUser.id);
+
+                if (error) {
+                    console.error('Error deleting from Supabase:', error);
+                }
+            } catch (error) {
+                console.error('Supabase error:', error);
+            }
+        }
+        
+        // También eliminar de localStorage
+        let materials = this.getMaterialsLocal();
         materials = materials.filter(m => m.id !== id);
         localStorage.setItem(this.KEYS.MATERIALS, JSON.stringify(materials));
         return materials;
     },
-    getProducts() {
+    
+    // Products
+    async getProducts() {
+        if (this.useSupabase) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('products')
+                    .select('*')
+                    .eq('user_id', Auth.currentUser.id);
+                
+                if (error) {
+                    console.error('Error loading products from Supabase:', error);
+                    return this.getProductsLocal();
+                }
+                return data || [];
+            } catch (error) {
+                console.error('Supabase connection error:', error);
+                return this.getProductsLocal();
+            }
+        }
+        return this.getProductsLocal();
+    },
+
+    getProductsLocal() {
         const data = localStorage.getItem(this.KEYS.PRODUCTS);
         return data ? JSON.parse(data) : [];
     },
-    saveProduct(product) {
-        const products = this.getProducts();
+    
+    async saveProduct(product) {
+        if (this.useSupabase) {
+            try {
+                const productData = {
+                    ...product,
+                    user_id: Auth.currentUser.id,
+                    updated_at: new Date().toISOString()
+                };
+
+                const { error } = await supabaseClient
+                    .from('products')
+                    .upsert(productData, { onConflict: 'id' });
+
+                if (error) {
+                    console.error('Error saving product to Supabase:', error);
+                    return this.saveProductLocal(product);
+                }
+                
+                this.saveProductLocal(product);
+                return await this.getProducts();
+            } catch (error) {
+                console.error('Supabase error:', error);
+                return this.saveProductLocal(product);
+            }
+        }
+        
+        return this.saveProductLocal(product);
+    },
+
+    saveProductLocal(product) {
+        const products = this.getProductsLocal();
         const index = products.findIndex(p => p.id === product.id);
+        
         if (index >= 0) {
             products[index] = product;
         } else {
             products.push(product);
         }
+        
         localStorage.setItem(this.KEYS.PRODUCTS, JSON.stringify(products));
         return products;
     },
-    deleteProduct(id) {
-        let products = this.getProducts();
+    
+    async deleteProduct(id) {
+        if (this.useSupabase) {
+            try {
+                const { error } = await supabaseClient
+                    .from('products')
+                    .delete()
+                    .eq('id', id)
+                    .eq('user_id', Auth.currentUser.id);
+
+                if (error) {
+                    console.error('Error deleting product from Supabase:', error);
+                }
+            } catch (error) {
+                console.error('Supabase error:', error);
+            }
+        }
+        
+        let products = this.getProductsLocal();
         products = products.filter(p => p.id !== id);
         localStorage.setItem(this.KEYS.PRODUCTS, JSON.stringify(products));
         return products;

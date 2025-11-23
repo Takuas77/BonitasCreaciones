@@ -152,12 +152,6 @@ const UI = {
     },
 
     renderProducts(products, materials) {
-        console.log('🎨 renderProducts llamado:', {
-            productos: products.length,
-            materiales: materials.length,
-            elementoExiste: !!this.elements.productsList
-        });
-        
         if (!this.elements.productsList) return; // Salir si no está en la vista de productos
         
         this.elements.productsList.innerHTML = '';
@@ -211,11 +205,6 @@ const UI = {
     },
 
     renderDashboardMetrics(materials, history = []) {
-        console.log('📊 renderDashboardMetrics llamado:', {
-            materiales: materials.length,
-            historial: history.length
-        });
-        
         // Calcular estadísticas de ventas y costos del historial
         let sales = 0;
         let costs = 0;
@@ -234,26 +223,22 @@ const UI = {
         // Actualizar ventas totales
         if (this.elements.totalSales) {
             this.elements.totalSales.textContent = '$' + sales.toFixed(2);
-            console.log('✅ Total ventas actualizado:', sales.toFixed(2));
         }
         
         // Actualizar costos totales
         if (this.elements.totalCosts) {
             this.elements.totalCosts.textContent = '$' + costs.toFixed(2);
-            console.log('✅ Total costos actualizado:', costs.toFixed(2));
         }
         
         // Actualizar ganancia neta
         if (this.elements.totalProfit) {
             this.elements.totalProfit.textContent = '$' + profit.toFixed(2);
             this.elements.totalProfit.className = profit >= 0 ? 'stat-value success' : 'stat-value warning';
-            console.log('✅ Ganancia actualizada:', profit.toFixed(2));
         }
         
         // Actualizar contador de productos (necesitamos acceder a App.state.products)
         if (this.elements.totalProductsCount && window.App && window.App.state) {
             this.elements.totalProductsCount.textContent = window.App.state.products.length;
-            console.log('✅ Total productos actualizado:', window.App.state.products.length);
         }
         
         // Calcular materiales con stock bajo
@@ -277,7 +262,6 @@ const UI = {
         // Actualizar contador de materiales bajos
         if (this.elements.lowStockCount) {
             this.elements.lowStockCount.textContent = lowStock;
-            console.log('✅ Materiales con stock bajo:', lowStock);
         }
         
         // Mostrar alerta si hay materiales con stock bajo
@@ -309,24 +293,15 @@ const UI = {
             if (sortedConsumption.length === 0) {
                 this.elements.topConsumedList.innerHTML = '<li class="stock-item" style="color: var(--text-muted); justify-content: center;">Sin datos aún</li>';
             }
-            console.log('✅ Top 5 materiales consumidos actualizado');
         }
     },
 
     renderMaterials(materials, history = []) {
         this.renderDashboardMetrics(materials, history);
         
-        console.log('🎨 renderMaterials llamado:', {
-            materiales: materials.length,
-            historial: history.length,
-            elementoExiste: !!this.elements.materialsList
-        });
-        
         if (!this.elements.materialsList) return; // Salir si no está en la vista de materiales
         
         this.elements.materialsList.innerHTML = '';
-        
-        console.log('🧹 Lista limpiada, agregando materiales...');
         
         if (this.elements.recipeSelect) {
             this.elements.recipeSelect.innerHTML = '<option value="">Seleccionar Material...</option>';
@@ -334,8 +309,7 @@ const UI = {
         
         if (this.elements.lowStockList) this.elements.lowStockList.innerHTML = '';
         let lowStock = 0;
-        materials.forEach((material, index) => {
-            console.log(`➕ Agregando material ${index + 1}:`, material.name);
+        materials.forEach(material => {
             const row = document.createElement('tr');
             const stockBadge = material.stock < 5 ? 'low' : 'ok';
             const categoryBadge = material.category || 'Otros';
@@ -370,9 +344,6 @@ const UI = {
                 }
             }
         });
-        
-        console.log(`✅ ${materials.length} materiales agregados al DOM`);
-        console.log('🔍 Filas en la tabla:', this.elements.materialsList.children.length);
         
         if (this.elements.lowStockCount) {
             this.elements.lowStockCount.textContent = lowStock;
@@ -464,13 +435,7 @@ const UI = {
     },
 
     renderSales(sales) {
-        console.log('🎨 renderSales llamado:', {
-            ventas: sales.length
-        });
-        
         const salesList = document.getElementById('sales-list');
-        console.log('🔍 Elemento sales-list existe:', !!salesList);
-        
         if (!salesList) return;
 
         if (sales.length === 0) {

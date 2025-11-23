@@ -91,19 +91,12 @@ const ViewLoader = {
         // Obtener la vista que se acaba de cargar
         const viewElement = this.containers.views.querySelector('.view');
         
-        console.log('🔍 ViewElement encontrado:', !!viewElement);
-        console.log('🔍 Clases antes:', viewElement?.className);
-        
         if (viewElement) {
             // Remover clase hidden si existe
             viewElement.classList.remove('hidden');
             // Agregar clase active para mostrar la vista
             viewElement.classList.add('active');
-            console.log('✅ Clase hidden removida y active agregada');
         }
-        
-        console.log('🔍 Clases después:', viewElement?.className);
-        console.log('🔍 Display style:', viewElement ? window.getComputedStyle(viewElement).display : 'N/A');
 
         // Disparar evento personalizado para que otros módulos sepan que la vista cambió
         document.dispatchEvent(new CustomEvent('viewLoaded', { 

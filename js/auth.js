@@ -423,7 +423,7 @@
         if (this.currentUser) {
             const brandText = document.querySelector('.brand-text h1');
             if (brandText) {
-                brandText.textContent = 'Hola ' + this.currentUser.name + '! 👋';
+                brandText.textContent = 'Hola ' + this.currentUser.name + '!';
             }
         }
     },

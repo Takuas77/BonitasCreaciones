@@ -57,7 +57,9 @@ const Storage = {
     addHistoryEntry(entry) {
         const history = this.getHistory();
         history.unshift(entry);
-        if (history.length > 100) { history.splice(100); }
+        if (history.length > 100) {
+            history.splice(100);
+        }
         localStorage.setItem(this.KEYS.HISTORY, JSON.stringify(history));
     },
     clearHistory() {
@@ -69,36 +71,79 @@ const Storage = {
     },
     addPriceHistory(materialId, materialName, oldPrice, newPrice) {
         const history = this.getPriceHistory();
-        history.unshift({ id: Date.now(), materialId, materialName, oldPrice, newPrice, date: new Date().toISOString() });
-        if (history.length > 50) { history.splice(50); }
+        history.unshift({
+            id: Date.now(),
+            materialId,
+            materialName,
+            oldPrice,
+            newPrice,
+            date: new Date().toISOString()
+        });
+        if (history.length > 50) {
+            history.splice(50);
+        }
         localStorage.setItem(this.KEYS.PRICE_HISTORY, JSON.stringify(history));
     },
     exportToCSV(data, filename) {
-        if (!data || data.length === 0) { alert('No hay datos para exportar'); return; }
+        if (!data || data.length === 0) {
+            alert('No hay datos para exportar');
+            return;
+        }
         const headers = Object.keys(data[0]);
-        const csv = [headers.join(','), ...data.map(row => headers.map(header => { let cell = row[header]; if (typeof cell === 'object') { cell = JSON.stringify(cell); } if (cell && (cell.includes(',') || cell.includes('"'))) { cell = '"' + cell.replace(/""/g, '"""") + '"'; } return cell || ''; }).join(','))].join('\n');
+        const csvRows = [];
+        csvRows.push(headers.join(','));
+        
+        for (const row of data) {
+            const values = headers.map(header => {
+                let cell = row[header];
+                if (typeof cell === 'object') {
+                    cell = JSON.stringify(cell);
+                }
+                if (cell && (String(cell).includes(',') || String(cell).includes('"'))) {
+                    cell = '"' + String(cell).replace(/"/g, '""') + '"';
+                }
+                return cell || '';
+            });
+            csvRows.push(values.join(','));
+        }
+        
+        const csv = csvRows.join('\n');
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
+        link.download = filename + '_' + new Date().toISOString().split('T')[0] + '.csv';
         link.click();
     },
     exportAllData() {
-        const allData = { materials: this.getMaterials(), products: this.getProducts(), history: this.getHistory(), priceHistory: this.getPriceHistory(), exportDate: new Date().toISOString() };
+        const allData = {
+            materials: this.getMaterials(),
+            products: this.getProducts(),
+            history: this.getHistory(),
+            priceHistory: this.getPriceHistory(),
+            exportDate: new Date().toISOString()
+        };
         const json = JSON.stringify(allData, null, 2);
         const blob = new Blob([json], { type: 'application/json' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `bonitas_creaciones_backup_${new Date().toISOString().split('T')[0]}.json`;
+        link.download = 'bonitas_creaciones_backup_' + new Date().toISOString().split('T')[0] + '.json';
         link.click();
     },
     importData(jsonString) {
         try {
             const data = JSON.parse(jsonString);
-            if (data.materials) { localStorage.setItem(this.KEYS.MATERIALS, JSON.stringify(data.materials)); }
-            if (data.products) { localStorage.setItem(this.KEYS.PRODUCTS, JSON.stringify(data.products)); }
-            if (data.history) { localStorage.setItem(this.KEYS.HISTORY, JSON.stringify(data.history)); }
-            if (data.priceHistory) { localStorage.setItem(this.KEYS.PRICE_HISTORY, JSON.stringify(data.priceHistory)); }
+            if (data.materials) {
+                localStorage.setItem(this.KEYS.MATERIALS, JSON.stringify(data.materials));
+            }
+            if (data.products) {
+                localStorage.setItem(this.KEYS.PRODUCTS, JSON.stringify(data.products));
+            }
+            if (data.history) {
+                localStorage.setItem(this.KEYS.HISTORY, JSON.stringify(data.history));
+            }
+            if (data.priceHistory) {
+                localStorage.setItem(this.KEYS.PRICE_HISTORY, JSON.stringify(data.priceHistory));
+            }
             return true;
         } catch (error) {
             console.error('Error importing data:', error);

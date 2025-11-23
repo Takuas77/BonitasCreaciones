@@ -1,0 +1,34 @@
+# 🎨 Favicon para Bonitas Creaciones
+
+## Actualmente configurado:
+✅ Se usa logo.png como favicon (32x32, 16x16, y Apple touch icon)
+
+## Para crear un favicon.ico optimizado (opcional):
+
+### Opción 1: Usar una herramienta online
+1. Ve a: https://favicon.io/favicon-converter/
+2. Sube tu archivo `logo.png`
+3. Descarga el favicon.ico generado
+4. Guárdalo en la carpeta `images/favicon.ico`
+
+### Opción 2: Usar Photoshop/GIMP
+1. Abre logo.png
+2. Redimensiona a 32x32 píxeles (mantén calidad)
+3. Exporta como favicon.ico
+
+### Opción 3: Crear emoji favicon
+Si quieres un emoji como 💖 o 🎀:
+1. Ve a: https://favicon.io/emoji-favicons/
+2. Elige tu emoji favorito
+3. Descarga y extrae el favicon.ico
+
+## Una vez tengas favicon.ico:
+Agrega esta línea al <head> de index.html (arriba del resto):
+```html
+<link rel="icon" href="images/favicon.ico" type="image/x-icon">
+```
+
+## Notas:
+- PNG funciona perfectamente en navegadores modernos
+- ICO es opcional, solo para mejor compatibilidad con navegadores viejos
+- El favicon actual ya funciona bien ✅

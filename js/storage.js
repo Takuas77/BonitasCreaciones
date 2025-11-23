@@ -263,15 +263,25 @@ const Storage = {
     async getHistory() {
         if (this.useSupabase) {
             try {
-                const { data, error } = await supabaseClient
+                // Intentar primero con user_id
+                let query = supabaseClient
                     .from('history')
                     .select('*')
-                    .eq('user_id', Auth.currentUser.id)
                     .order('date', { ascending: false })
                     .limit(100);
                 
+                // Agregar filtro de user_id solo si la columna existe
+                try {
+                    query = query.eq('user_id', Auth.currentUser.id);
+                } catch (e) {
+                    console.warn('⚠️ Tabla history sin user_id - usando sin filtro');
+                }
+                
+                const { data, error } = await query;
+                
                 if (error) {
                     console.error('Error loading history from Supabase:', error);
+                    console.warn('⚠️ IMPORTANTE: Necesitas ejecutar fix_history_table.sql en Supabase');
                     return this.getHistoryLocal();
                 }
                 
@@ -279,6 +289,7 @@ const Storage = {
                 return data || [];
             } catch (error) {
                 console.error('Supabase connection error:', error);
+                console.warn('⚠️ Usando localStorage como fallback');
                 return this.getHistoryLocal();
             }
         }
@@ -293,7 +304,6 @@ const Storage = {
         if (this.useSupabase) {
             try {
                 const historyData = {
-                    user_id: Auth.currentUser.id,
                     type: entry.type || 'production',
                     product_name: entry.productName,
                     quantity: entry.quantity,
@@ -303,15 +313,25 @@ const Storage = {
                     date: new Date().toISOString()
                 };
 
+                // Intentar agregar user_id si la columna existe
+                try {
+                    historyData.user_id = Auth.currentUser.id;
+                } catch (e) {
+                    console.warn('⚠️ Tabla history sin user_id');
+                }
+
                 const { error } = await supabaseClient
                     .from('history')
                     .insert(historyData);
 
                 if (error) {
                     console.error('Error saving history to Supabase:', error);
+                    console.warn('⚠️ IMPORTANTE: Ejecuta fix_history_table.sql para corregir la tabla');
+                    // No fallar, continuar guardando en localStorage
                 }
             } catch (error) {
                 console.error('Supabase error:', error);
+                console.warn('⚠️ Guardando solo en localStorage');
             }
         }
         

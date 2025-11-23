@@ -1,0 +1,58 @@
+<!-- Sales Modal -->
+<div id="modal-sale" class="modal hidden">
+    <div class="modal-content glass-panel">
+        <span class="close-modal">&times;</span>
+        <h2 id="modal-sale-title">Nueva Venta</h2>
+        <form id="form-sale">
+            <input type="hidden" id="sale-id">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Producto</label>
+                    <select id="sale-product" required>
+                        <option value="">Seleccionar producto...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cantidad</label>
+                    <input type="number" id="sale-quantity" step="1" min="1" value="1" required placeholder="1">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Cliente (opcional)</label>
+                    <input type="text" id="sale-customer" placeholder="Nombre del cliente">
+                </div>
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" id="sale-date" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Precio Unitario ($)</label>
+                    <input type="number" id="sale-price" step="0.01" min="0" required placeholder="0.00">
+                    <small style="color: var(--text-muted); font-size: 0.8rem;">Precio sugerido: <span id="suggested-price">$0.00</span></small>
+                </div>
+                <div class="form-group">
+                    <label>Total ($)</label>
+                    <input type="number" id="sale-total" step="0.01" readonly placeholder="0.00" style="background: var(--glass-bg); cursor: not-allowed;">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Notas (opcional)</label>
+                <textarea id="sale-notes" rows="3" placeholder="Detalles adicionales..."></textarea>
+            </div>
+            <div class="cost-summary">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>Costo Total:</span>
+                    <strong id="sale-cost-total">$0.00</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; color: var(--success);">
+                    <span>Ganancia Estimada:</span>
+                    <strong id="sale-profit">$0.00</strong>
+                </div>
+            </div>
+            <button type="submit" class="action-btn primary full-width">Registrar Venta</button>
+        </form>
+    </div>
+</div>

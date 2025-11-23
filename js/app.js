@@ -47,6 +47,32 @@ const App = {
         UI.renderSales(this.state.sales);
     },
 
+    /**
+     * Refresca la vista actual después de que se cargue dinámicamente
+     * @param {string} viewName - Nombre de la vista cargada
+     */
+    refreshCurrentView(viewName) {
+        // Actualizar referencias de elementos en UI
+        UI.refreshElementReferences();
+        
+        // Renderizar datos según la vista
+        switch(viewName) {
+            case 'dashboard':
+                UI.renderMaterials(this.state.materials, this.state.history);
+                UI.renderProducts(this.state.products, this.state.materials);
+                break;
+            case 'materials':
+                UI.renderMaterials(this.state.materials, this.state.history);
+                break;
+            case 'products':
+                UI.renderProducts(this.state.products, this.state.materials);
+                break;
+            case 'sales':
+                UI.renderSales(this.state.sales);
+                break;
+        }
+    },
+
     setupEventListeners() {
         // Material Form
         document.getElementById('btn-add-material').addEventListener('click', () => {

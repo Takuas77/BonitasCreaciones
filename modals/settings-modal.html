@@ -1,0 +1,35 @@
+<!-- Settings Modal -->
+<div id="modal-settings" class="modal hidden">
+    <div class="modal-content glass-panel">
+        <span class="close-modal">&times;</span>
+        <h2>Configuración de Base de Datos</h2>
+        <p style="margin-bottom: 15px; color: var(--text-muted);">Conecta tu aplicación a Supabase para guardar los
+            datos en la nube.</p>
+
+        <form id="form-settings">
+            <div class="form-group">
+                <label>Supabase URL</label>
+                <input type="text" id="supabase-url" placeholder="https://xyz.supabase.co">
+            </div>
+            <div class="form-group">
+                <label>Supabase Anon Key</label>
+                <input type="password" id="supabase-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." autocomplete="off">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="action-btn primary full-width">Guardar y Conectar</button>
+                <button type="button" id="btn-disconnect" class="action-btn danger">Desconectar</button>
+            </div>
+        </form>
+
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--glass-border);">
+            <h3>Instrucciones</h3>
+            <ol style="padding-left: 20px; color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">
+                <li>Crea una cuenta en <a href="https://supabase.com" target="_blank"
+                        style="color: var(--primary);">supabase.com</a></li>
+                <li>Crea un nuevo proyecto.</li>
+                <li>Ve al "SQL Editor" y ejecuta el script que te he proporcionado (supabase_schema.sql).</li>
+                <li>Ve a "Project Settings" > "API" y copia la URL y la Anon Key aquí.</li>
+            </ol>
+        </div>
+    </div>
+</div>

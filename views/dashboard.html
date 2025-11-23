@@ -1,0 +1,65 @@
+<!-- Dashboard View -->
+<section id="dashboard" class="view active">
+    <!-- Resumen General -->
+    <div class="dashboard-section">
+        <div class="glass-panel">
+            <h2 class="section-title">Resumen General</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-label">Productos</span>
+                    <span class="stat-value" id="total-products-count">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Ventas Totales</span>
+                    <span class="stat-value success" id="total-sales">$0.00</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Costos Totales</span>
+                    <span class="stat-value" id="total-costs">$0.00</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Ganancia Neta</span>
+                    <span class="stat-value success" id="total-profit">$0.00</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Materiales Bajos</span>
+                    <span class="stat-value warning" id="low-stock-count">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="low-stock-alert"></div>
+
+    <!-- Materiales con Stock Bajo -->
+    <div class="dashboard-section">
+        <div class="glass-panel">
+            <h3 class="section-title">Materiales con Stock Bajo</h3>
+            <ul class="stock-list" id="low-stock-list">
+                <!-- Populated by JS -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- Materiales Más Consumidos -->
+    <div class="dashboard-section">
+        <div class="glass-panel">
+            <h3 class="section-title">Materiales Más Consumidos</h3>
+            <ul class="stock-list" id="top-consumed-list">
+                <!-- Populated by JS -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- Gestión de Datos -->
+    <div class="dashboard-section">
+        <div class="glass-panel">
+            <h3 class="section-title">Gestión de Datos</h3>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
+                <button id="btn-export-data" class="action-btn secondary">Exportar Datos</button>
+                <button id="btn-bulk-calculator" class="action-btn primary">Pedidos Grandes</button>
+                <button id="btn-reset-history" class="action-btn danger">Reiniciar Historial</button>
+            </div>
+        </div>
+    </div>
+</section>

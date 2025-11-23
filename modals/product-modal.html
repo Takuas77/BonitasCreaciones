@@ -1,0 +1,73 @@
+<!-- Product Modal -->
+<div id="modal-product" class="modal hidden">
+    <div class="modal-content glass-panel large">
+        <span class="close-modal">&times;</span>
+        <h2 id="modal-product-title">Nuevo Producto</h2>
+        <form id="form-product">
+            <input type="hidden" id="product-id">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nombre del Producto</label>
+                    <input type="text" id="product-name" required placeholder="Ej. Cartuchera Escolar">
+                </div>
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <select id="product-category">
+                        <option value="Cartucheras">Cartucheras</option>
+                        <option value="Neceseres">Neceseres</option>
+                        <option value="Mochilas">Mochilas</option>
+                        <option value="Porta Cosméticos">Porta Cosméticos</option>
+                        <option value="General">General</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Imagen del Producto</label>
+                <input type="file" id="product-image" accept="image/*">
+                <div id="image-preview" style="margin-top: 10px; display: none;">
+                    <img id="preview-img"
+                        style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid var(--glass-border);">
+                    <button type="button" id="btn-remove-image" class="action-btn danger"
+                        style="margin-top: 8px; padding: 4px 12px; font-size: 0.85rem;">Eliminar Imagen</button>
+                </div>
+                <small style="color: var(--text-muted); font-size: 0.8rem;">Formatos: JPG, PNG, WebP (máx.
+                    2MB)</small>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Margen de Ganancia Deseado (%)</label>
+                    <input type="number" id="product-margin" step="1" min="0" placeholder="Ej. 50" value="50">
+                    <small style="color: var(--text-muted); font-size: 0.8rem;">Se calcula si editas el
+                        precio</small>
+                </div>
+                <div class="form-group">
+                    <label>Precio de Venta ($)</label>
+                    <input type="number" id="product-price" step="0.01" placeholder="Se calcula automáticamente">
+                    <small style="color: var(--text-muted); font-size: 0.8rem;">Editable - el margen se
+                        ajustará</small>
+                </div>
+            </div>
+
+            <h3>Materiales</h3>
+            <div class="recipe-builder">
+                <div class="form-row">
+                    <select id="recipe-material-select">
+                        <option value="">Seleccionar Material...</option>
+                    </select>
+                    <input type="number" id="recipe-quantity" placeholder="Cantidad" step="0.01">
+                    <button type="button" id="btn-add-ingredient" class="action-btn secondary">Agregar</button>
+                </div>
+                <ul id="recipe-list" class="recipe-list">
+                    <!-- Ingredients list -->
+                </ul>
+                <div class="cost-summary">
+                    <span>Costo Total: <strong id="product-total-cost">$0.00</strong></span>
+                </div>
+            </div>
+
+            <button type="submit" class="action-btn primary full-width">Guardar Producto</button>
+        </form>
+    </div>
+</div>

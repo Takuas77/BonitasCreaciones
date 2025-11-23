@@ -1,0 +1,40 @@
+<!-- Materials View -->
+<section id="materials" class="view hidden">
+    <div class="glass-panel">
+        <div class="section-header">
+            <h2>Mis Materiales</h2>
+            <div style="display: flex; gap: 12px; align-items: center; flex: 1; justify-content: flex-end;">
+                <input type="text" id="search-materials" placeholder="Buscar materiales..."
+                    style="max-width: 300px;">
+                <select id="filter-material-category" style="max-width: 200px;">
+                    <option value="all">Todas las categorías</option>
+                    <option value="Telas">Telas</option>
+                    <option value="Cierres">Cierres</option>
+                    <option value="Forros">Forros</option>
+                    <option value="Accesorios">Accesorios</option>
+                    <option value="Hilos">Hilos</option>
+                    <option value="Relleno">Relleno</option>
+                    <option value="Otros">Otros</option>
+                </select>
+                <button id="btn-add-material" class="action-btn primary">Nuevo Material</button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Unidad</th>
+                        <th>Costo</th>
+                        <th>Stock</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="materials-list">
+                    <!-- Material rows will be injected here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

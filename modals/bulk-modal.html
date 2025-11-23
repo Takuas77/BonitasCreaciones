@@ -1,0 +1,19 @@
+<!-- Bulk Order Calculator Modal -->
+<div id="modal-bulk" class="modal hidden">
+    <div class="modal-content glass-panel large">
+        <span class="close-modal">&times;</span>
+        <h2>Calculadora de Pedidos Grandes</h2>
+        <div class="form-group">
+            <label>Selecciona el Producto</label>
+            <select id="bulk-product">
+                <option value="">Seleccionar producto...</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Cantidad a Producir</label>
+            <input type="number" id="bulk-quantity" min="1" value="1" placeholder="Ej: 50">
+        </div>
+        <button id="btn-calculate-bulk" class="action-btn primary">Calcular Materiales</button>
+        <div id="bulk-results" style="margin-top: 20px;"></div>
+    </div>
+</div>

@@ -381,11 +381,15 @@
     },
 
     async showApp() {
-        document.getElementById('auth-screen').classList.add('hidden');
+        const authScreen = document.getElementById('auth-screen') || document.querySelector('#auth-container #auth-screen');
+        if (authScreen) {
+            authScreen.classList.add('hidden');
+        }
+        
         document.querySelector('.app-container').classList.remove('hidden');
         
-        // Resetear navegación al dashboard
-        this.resetNavigation();
+        // Cargar vista del dashboard
+        await this.loadInitialView();
         
         // Inicializar la aplicación si no ha sido inicializada
         if (typeof App !== 'undefined' && App.init) {
@@ -393,30 +397,21 @@
         }
     },
 
-    resetNavigation() {
-        // Resetear todos los botones de navegación
-        const navBtns = document.querySelectorAll('.nav-btn');
-        navBtns.forEach(btn => btn.classList.remove('active'));
+    async loadInitialView() {
+        // Cargar dashboard como vista inicial
+        await ViewLoader.loadView('dashboard');
         
-        // Activar el botón del dashboard
+        // Activar botón de navegación del dashboard
         const dashboardBtn = document.querySelector('.nav-btn[data-target="dashboard"]');
         if (dashboardBtn) {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             dashboardBtn.classList.add('active');
         }
-        
-        // Ocultar todas las vistas
-        const views = document.querySelectorAll('.view');
-        views.forEach(v => {
-            v.classList.remove('active');
-            v.classList.add('hidden');
-        });
-        
-        // Mostrar solo el dashboard
-        const dashboardView = document.getElementById('dashboard');
-        if (dashboardView) {
-            dashboardView.classList.remove('hidden');
-            dashboardView.classList.add('active');
-        }
+    },
+
+    resetNavigation() {
+        // Esta función ya no es necesaria con el nuevo sistema
+        // pero la mantenemos para compatibilidad
     },
 
     updateUserUI() {

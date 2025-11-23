@@ -48,6 +48,7 @@ La documentación unificada incluye:
 - ✅ Sistema de autenticación
 - ✅ Guía de uso de todos los módulos
 - ✅ **Módulo de Ventas - Guía completa** ⭐
+- ✅ **Sistema de Vistas Modulares** ⭐⭐ NUEVO
 - ✅ Solución de problemas
 - ✅ Guía de desarrollo
 

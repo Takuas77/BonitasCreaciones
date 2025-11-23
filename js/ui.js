@@ -1,22 +1,23 @@
 const UI = {
     initialized: false, // Bandera para evitar inicialización múltiple
+    currentView: 'dashboard',
     
     elements: {
-        materialsList: document.getElementById('materials-list'),
-        productsList: document.getElementById('products-list'),
-        recipeList: document.getElementById('recipe-list'),
-        recipeSelect: document.getElementById('recipe-material-select'),
-        totalProductsCount: document.getElementById('total-products-count'),
-        totalSales: document.getElementById('total-sales'),
-        totalCosts: document.getElementById('total-costs'),
-        totalProfit: document.getElementById('total-profit'),
-        lowStockCount: document.getElementById('low-stock-count'),
-        lowStockAlert: document.getElementById('low-stock-alert'),
-        lowStockList: document.getElementById('low-stock-list'),
-        topConsumedList: document.getElementById('top-consumed-list'),
+        materialsList: null,
+        productsList: null,
+        recipeList: null,
+        recipeSelect: null,
+        totalProductsCount: null,
+        totalSales: null,
+        totalCosts: null,
+        totalProfit: null,
+        lowStockCount: null,
+        lowStockAlert: null,
+        lowStockList: null,
+        topConsumedList: null,
         modals: {
-            material: document.getElementById('modal-material'),
-            product: document.getElementById('modal-product')
+            material: null,
+            product: null
         }
     },
 
@@ -28,29 +29,70 @@ const UI = {
         this.setupNavigation();
         this.setupModals();
         this.setupListDelegation();
+        this.setupViewLoadedListener();
         this.initialized = true;
     },
 
-    setupNavigation() {
-        const navBtns = document.querySelectorAll('.nav-btn');
-        const views = document.querySelectorAll('.view');
-        navBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                // Ignorar si no tiene data-target (ej: botón logout)
-                if (!btn.dataset.target) return;
-                
-                navBtns.forEach(b => b.classList.remove('active'));
-                views.forEach(v => {
-                    v.classList.remove('active');
-                    v.classList.add('hidden');
-                });
-                btn.classList.add('active');
-                const targetView = document.getElementById(btn.dataset.target);
-                if (targetView) {
-                    targetView.classList.remove('hidden');
-                    targetView.classList.add('active');
-                }
-            });
+    /**
+     * Escucha cuando se carga una vista y actualiza las referencias
+     */
+    setupViewLoadedListener() {
+        document.addEventListener('viewLoaded', (e) => {
+            console.log('Vista cargada:', e.detail.viewName);
+            this.currentView = e.detail.viewName;
+            this.refreshElementReferences();
+            
+            // Disparar evento para que app.js actualice los datos
+            if (window.App && typeof App.refreshCurrentView === 'function') {
+                App.refreshCurrentView(e.detail.viewName);
+            }
+        });
+
+        document.addEventListener('modalLoaded', (e) => {
+            console.log('Modal cargado:', e.detail.modalName);
+            this.setupModals(); // Re-configurar event listeners de modales
+        });
+    },
+
+    /**
+     * Actualiza las referencias a elementos del DOM después de cargar una vista
+     */
+    refreshElementReferences() {
+        this.elements.materialsList = document.getElementById('materials-list');
+        this.elements.productsList = document.getElementById('products-list');
+        this.elements.recipeList = document.getElementById('recipe-list');
+        this.elements.recipeSelect = document.getElementById('recipe-material-select');
+        this.elements.totalProductsCount = document.getElementById('total-products-count');
+        this.elements.totalSales = document.getElementById('total-sales');
+        this.elements.totalCosts = document.getElementById('total-costs');
+        this.elements.totalProfit = document.getElementById('total-profit');
+        this.elements.lowStockCount = document.getElementById('low-stock-count');
+        this.elements.lowStockAlert = document.getElementById('low-stock-alert');
+        this.elements.lowStockList = document.getElementById('low-stock-list');
+        this.elements.topConsumedList = document.getElementById('top-consumed-list');
+        this.elements.modals.material = document.getElementById('modal-material');
+        this.elements.modals.product = document.getElementById('modal-product');
+    },
+
+    async setupNavigation() {
+        document.body.addEventListener('click', async (e) => {
+            const navBtn = e.target.closest('.nav-btn');
+            if (!navBtn || !navBtn.dataset.target) return;
+
+            e.preventDefault();
+            
+            const targetView = navBtn.dataset.target;
+            
+            // Actualizar estado visual de botones
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            navBtn.classList.add('active');
+            
+            // Cargar vista usando ViewLoader
+            const loaded = await ViewLoader.loadView(targetView);
+            
+            if (loaded) {
+                this.currentView = targetView;
+            }
         });
     },
 

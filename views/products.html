@@ -1,0 +1,25 @@
+<!-- Products View -->
+<section id="products" class="view hidden">
+    <div class="glass-panel">
+        <div class="section-header">
+            <h2>Mis Productos</h2>
+            <div style="display: flex; gap: 12px; align-items: center; flex: 1; justify-content: flex-end;">
+                <input type="text" id="search-products" placeholder="Buscar productos..."
+                    style="max-width: 300px;">
+                <select id="filter-product-category" style="max-width: 200px;">
+                    <option value="all">Todas las categorías</option>
+                    <option value="Cartucheras">Cartucheras</option>
+                    <option value="Neceseres">Neceseres</option>
+                    <option value="Mochilas">Mochilas</option>
+                    <option value="Porta Cosméticos">Porta Cosméticos</option>
+                    <option value="General">General</option>
+                </select>
+                <button id="btn-view-gallery" class="action-btn secondary">📸 Galería</button>
+                <button id="btn-add-product" class="action-btn primary">Nuevo Producto</button>
+            </div>
+        </div>
+        <div class="products-grid" id="products-list">
+            <!-- Product cards will be injected here -->
+        </div>
+    </div>
+</section>

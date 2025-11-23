@@ -50,6 +50,11 @@ const App = {
             document.getElementById('form-material').reset();
             document.getElementById('material-id').value = '';
             document.getElementById('modal-material-title').textContent = 'Nuevo Material';
+            // Limpiar estado de imagen al crear nuevo material
+            this.removeMaterialImage();
+            this.state.currentMaterialImage = '';
+            this.state.currentMaterialImageFile = null;
+            this.state.currentMaterialImagePath = '';
             UI.showModal('modal-material');
         });
 
@@ -77,6 +82,11 @@ const App = {
             document.getElementById('product-id').value = '';
             document.getElementById('product-margin').value = '50'; // Default margin
             document.getElementById('modal-product-title').textContent = 'Nuevo Producto';
+            // Limpiar estado de imagen al crear nuevo producto
+            this.removeProductImage();
+            this.state.currentProductImage = '';
+            this.state.currentProductImageFile = null;
+            this.state.currentProductImagePath = '';
             // Refresh materials to ensure dropdown is up to date
             UI.renderMaterials(this.state.materials, this.state.history);
             UI.renderRecipeList(this.state.currentRecipe, this.state.materials);

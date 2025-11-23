@@ -1,4 +1,6 @@
 const UI = {
+    initialized: false, // Bandera para evitar inicialización múltiple
+    
     elements: {
         materialsList: document.getElementById('materials-list'),
         productsList: document.getElementById('products-list'),
@@ -19,9 +21,16 @@ const UI = {
     },
 
     init() {
+        // Evitar inicialización múltiple
+        if (this.initialized) {
+            console.log('UI ya inicializada, saltando setup de listeners...');
+            return;
+        }
+        
         this.setupNavigation();
         this.setupModals();
         this.setupListDelegation();
+        this.initialized = true;
     },
 
     setupNavigation() {

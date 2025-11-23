@@ -3,6 +3,7 @@
     CURRENT_USER_KEY: 'bonitas_creaciones_current_user',
     currentUser: null,
     useSupabase: false,
+    listenersInitialized: false, // Bandera para evitar duplicación de listeners
 
     async init() {
         // Verificar si Supabase está disponible
@@ -14,7 +15,12 @@
             console.log('🔐 Modo: Local Storage Auth');
         }
 
-        this.setupAuthListeners();
+        // Solo configurar listeners una vez
+        if (!this.listenersInitialized) {
+            this.setupAuthListeners();
+            this.listenersInitialized = true;
+        }
+        
         await this.checkAuthState();
     },
 

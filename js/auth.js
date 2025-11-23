@@ -82,29 +82,45 @@
     },
 
     setupAuthListeners() {
-        document.getElementById('login-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleLogin();
-        });
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const showRegister = document.getElementById('show-register');
+        
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleLogin();
+            });
+        }
 
-        document.getElementById('register-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleRegister();
-        });
+        if (registerForm) {
+            registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleRegister();
+            });
+        }
 
-        document.getElementById('show-register').addEventListener('click', (e) => {
-            e.preventDefault();
-            this.showRegisterForm();
-        });
+        if (showRegister) {
+            showRegister.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showRegisterForm();
+            });
+        }
 
-        document.getElementById('show-login').addEventListener('click', (e) => {
-            e.preventDefault();
-            this.showLoginForm();
-        });
+        const showLogin = document.getElementById('show-login');
+        if (showLogin) {
+            showLogin.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showLoginForm();
+            });
+        }
 
-        document.getElementById('btn-logout').addEventListener('click', () => {
-            this.logout();
-        });
+        const btnLogout = document.getElementById('btn-logout');
+        if (btnLogout) {
+            btnLogout.addEventListener('click', () => {
+                this.logout();
+            });
+        }
     },
 
     showLoginForm() {

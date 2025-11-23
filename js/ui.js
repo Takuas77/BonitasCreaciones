@@ -152,8 +152,14 @@ const UI = {
     },
 
     renderProducts(products, materials) {
+        if (!this.elements.productsList) return; // Salir si no está en la vista de productos
+        
         this.elements.productsList.innerHTML = '';
-        this.elements.totalProductsCount.textContent = products.length;
+        
+        if (this.elements.totalProductsCount) {
+            this.elements.totalProductsCount.textContent = products.length;
+        }
+        
         products.forEach(product => {
             const card = document.createElement('div');
             card.className = 'product-card';
@@ -244,8 +250,15 @@ const UI = {
 
     renderMaterials(materials, history = []) {
         this.renderDashboardMetrics(materials, history);
+        
+        if (!this.elements.materialsList) return; // Salir si no está en la vista de materiales
+        
         this.elements.materialsList.innerHTML = '';
-        this.elements.recipeSelect.innerHTML = '<option value="">Seleccionar Material...</option>';
+        
+        if (this.elements.recipeSelect) {
+            this.elements.recipeSelect.innerHTML = '<option value="">Seleccionar Material...</option>';
+        }
+        
         if (this.elements.lowStockList) this.elements.lowStockList.innerHTML = '';
         let lowStock = 0;
         materials.forEach(material => {
@@ -265,10 +278,14 @@ const UI = {
             
             row.innerHTML = '<td>' + materialNameHtml + '</td><td><span class="category-badge">' + categoryBadge + '</span></td><td>' + material.unit + '</td><td>$' + parseFloat(material.cost).toFixed(2) + '</td><td><span class="stock-badge ' + stockBadge + '">' + parseFloat(material.stock).toFixed(2) + '</span></td><td><button class="action-btn secondary edit-btn" data-id="' + material.id + '">✏️</button><button class="action-btn danger delete-btn" data-id="' + material.id + '">🗑️</button></td>';
             this.elements.materialsList.appendChild(row);
-            const option = document.createElement('option');
-            option.value = material.id;
-            option.textContent = material.name + ' ($' + material.cost + '/' + material.unit + ')';
-            this.elements.recipeSelect.appendChild(option);
+            
+            if (this.elements.recipeSelect) {
+                const option = document.createElement('option');
+                option.value = material.id;
+                option.textContent = material.name + ' ($' + material.cost + '/' + material.unit + ')';
+                this.elements.recipeSelect.appendChild(option);
+            }
+            
             if (material.stock < 5) {
                 lowStock++;
                 if (this.elements.lowStockList) {
@@ -279,15 +296,21 @@ const UI = {
                 }
             }
         });
-        this.elements.lowStockCount.textContent = lowStock;
-        if (lowStock > 0) {
-            const alertDiv = document.createElement('div');
-            alertDiv.style.cssText = 'background: rgba(245, 158, 11, 0.2); color: var(--warning); padding: 10px; border-radius: 8px; margin-bottom: 10px;';
-            alertDiv.textContent = '⚠️ Tienes ' + lowStock + ' materiales con stock bajo.';
-            this.elements.lowStockAlert.innerHTML = '';
-            this.elements.lowStockAlert.appendChild(alertDiv);
-        } else {
-            this.elements.lowStockAlert.innerHTML = '';
+        
+        if (this.elements.lowStockCount) {
+            this.elements.lowStockCount.textContent = lowStock;
+        }
+        
+        if (this.elements.lowStockAlert) {
+            if (lowStock > 0) {
+                const alertDiv = document.createElement('div');
+                alertDiv.style.cssText = 'background: rgba(245, 158, 11, 0.2); color: var(--warning); padding: 10px; border-radius: 8px; margin-bottom: 10px;';
+                alertDiv.textContent = '⚠️ Tienes ' + lowStock + ' materiales con stock bajo.';
+                this.elements.lowStockAlert.innerHTML = '';
+                this.elements.lowStockAlert.appendChild(alertDiv);
+            } else {
+                this.elements.lowStockAlert.innerHTML = '';
+            }
         }
     },
 

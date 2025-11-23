@@ -24,7 +24,7 @@ const App = {
         
         UI.init();
         await this.loadData();
-        this.setupEventListeners();
+        // No llamar setupEventListeners aquí, se llamará cuando las vistas estén cargadas
         this.setupSettingsListeners();
         this.initialized = true;
     },
@@ -55,6 +55,9 @@ const App = {
         // Actualizar referencias de elementos en UI
         UI.refreshElementReferences();
         
+        // Configurar event listeners para la vista actual
+        this.setupViewListeners(viewName);
+        
         // Renderizar datos según la vista
         switch(viewName) {
             case 'dashboard':
@@ -73,13 +76,46 @@ const App = {
         }
     },
 
-    setupEventListeners() {
-        // Material Form
-        document.getElementById('btn-add-material').addEventListener('click', () => {
-            document.getElementById('form-material').reset();
-            document.getElementById('material-id').value = '';
-            document.getElementById('modal-material-title').textContent = 'Nuevo Material';
-            // Limpiar estado de imagen al crear nuevo material
+    setupViewListeners(viewName) {
+        // Helper para agregar listener solo si el elemento existe
+        const addListener = (id, event, handler) => {
+            const element = document.getElementById(id);
+            if (element) {
+                // Remover listener anterior si existe para evitar duplicados
+                const newElement = element.cloneNode(true);
+                element.parentNode.replaceChild(newElement, element);
+                newElement.addEventListener(event, handler);
+            }
+        };
+
+        // Configurar listeners según la vista
+        switch(viewName) {
+            case 'dashboard':
+            case 'materials':
+                this.setupMaterialListeners(addListener);
+                break;
+            case 'products':
+                this.setupProductListeners(addListener);
+                break;
+            case 'sales':
+                this.setupSalesListeners(addListener);
+                break;
+        }
+
+        // Listeners comunes (modales, galería, export)
+        this.setupCommonListeners(addListener);
+    },
+
+    setupMaterialListeners(addListener) {
+        addListener('btn-add-material', 'click', () => {
+            const formMaterial = document.getElementById('form-material');
+            const materialId = document.getElementById('material-id');
+            const modalTitle = document.getElementById('modal-material-title');
+            
+            if (formMaterial) formMaterial.reset();
+            if (materialId) materialId.value = '';
+            if (modalTitle) modalTitle.textContent = 'Nuevo Material';
+            
             this.removeMaterialImage();
             this.state.currentMaterialImage = '';
             this.state.currentMaterialImageFile = null;
@@ -87,82 +123,34 @@ const App = {
             UI.showModal('modal-material');
         });
 
-        document.getElementById('form-material').addEventListener('submit', async (e) => {
+        addListener('form-material', 'submit', async (e) => {
             e.preventDefault();
-            
-            // Prevenir doble submit
             const submitBtn = e.target.querySelector('button[type="submit"]');
-            if (submitBtn.disabled) return;
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Guardando...';
+            if (submitBtn && submitBtn.disabled) return;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Guardando...';
+            }
             
             try {
                 await this.handleSaveMaterial();
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Guardar Material';
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Guardar Material';
+                }
             }
         });
 
-        // Product Form
-        document.getElementById('btn-add-product').addEventListener('click', () => {
-            this.state.currentRecipe = [];
-            document.getElementById('form-product').reset();
-            document.getElementById('product-id').value = '';
-            document.getElementById('product-margin').value = '50'; // Default margin
-            document.getElementById('modal-product-title').textContent = 'Nuevo Producto';
-            // Limpiar estado de imagen al crear nuevo producto
-            this.removeProductImage();
-            this.state.currentProductImage = '';
-            this.state.currentProductImageFile = null;
-            this.state.currentProductImagePath = '';
-            // Refresh materials to ensure dropdown is up to date
-            UI.renderMaterials(this.state.materials, this.state.history);
-            UI.renderRecipeList(this.state.currentRecipe, this.state.materials);
-            UI.showModal('modal-product');
+        addListener('search-materials', 'input', (e) => {
+            this.filterMaterials(e.target.value);
         });
 
-        document.getElementById('btn-add-ingredient').addEventListener('click', () => {
-            this.handleAddIngredient();
+        addListener('filter-material-category', 'change', (e) => {
+            this.filterMaterialsByCategory(e.target.value);
         });
 
-        // Update price when margin changes
-        document.getElementById('product-margin').addEventListener('input', () => {
-            this.updatePriceFromMargin();
-        });
-
-        // Update margin when price changes
-        document.getElementById('product-price').addEventListener('input', () => {
-            this.updateMarginFromPrice();
-        });
-
-        document.getElementById('form-product').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            // Prevenir doble submit
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            if (submitBtn.disabled) return;
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Guardando...';
-            
-            try {
-                await this.handleSaveProduct();
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Guardar Producto';
-            }
-        });
-
-        // Image preview
-        document.getElementById('product-image').addEventListener('change', (e) => {
-            this.handleImageUpload(e, 'product');
-        });
-
-        document.getElementById('btn-remove-image').addEventListener('click', () => {
-            this.removeProductImage();
-        });
-
-        // Material Image preview
+        // Material Image
         const materialImageInput = document.getElementById('material-image');
         if (materialImageInput) {
             materialImageInput.addEventListener('change', (e) => {
@@ -176,145 +164,207 @@ const App = {
                 this.removeMaterialImage();
             });
         }
+    },
 
-        // Gallery
-        document.getElementById('btn-view-gallery').addEventListener('click', () => {
-            UI.showGallery(this.state.products);
+    setupProductListeners(addListener) {
+        addListener('btn-add-product', 'click', () => {
+            this.state.currentRecipe = [];
+            const formProduct = document.getElementById('form-product');
+            const productId = document.getElementById('product-id');
+            const productMargin = document.getElementById('product-margin');
+            const modalTitle = document.getElementById('modal-product-title');
+            
+            if (formProduct) formProduct.reset();
+            if (productId) productId.value = '';
+            if (productMargin) productMargin.value = '50';
+            if (modalTitle) modalTitle.textContent = 'Nuevo Producto';
+            
+            this.removeProductImage();
+            this.state.currentProductImage = '';
+            this.state.currentProductImageFile = null;
+            this.state.currentProductImagePath = '';
+            UI.renderMaterials(this.state.materials, this.state.history);
+            UI.renderRecipeList(this.state.currentRecipe, this.state.materials);
+            UI.showModal('modal-product');
         });
 
-        document.getElementById('btn-share-catalog').addEventListener('click', () => {
-            this.shareCatalog();
+        addListener('btn-add-ingredient', 'click', () => {
+            this.handleAddIngredient();
         });
 
-        document.getElementById('btn-print-catalog').addEventListener('click', () => {
-            this.printCatalog();
+        addListener('product-margin', 'input', () => {
+            this.updatePriceFromMargin();
         });
 
-        // Search functionality
-        document.getElementById('search-materials').addEventListener('input', (e) => {
-            this.filterMaterials(e.target.value);
+        addListener('product-price', 'input', () => {
+            this.updateMarginFromPrice();
         });
 
-        document.getElementById('search-products').addEventListener('input', (e) => {
+        addListener('form-product', 'submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            if (submitBtn && submitBtn.disabled) return;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Guardando...';
+            }
+            
+            try {
+                await this.handleSaveProduct();
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Guardar Producto';
+                }
+            }
+        });
+
+        addListener('search-products', 'input', (e) => {
             this.filterProducts(e.target.value);
         });
 
-        // Category filters
-        document.getElementById('filter-material-category').addEventListener('change', (e) => {
-            this.filterMaterialsByCategory(e.target.value);
-        });
-
-        document.getElementById('filter-product-category').addEventListener('change', (e) => {
+        addListener('filter-product-category', 'change', (e) => {
             this.filterProductsByCategory(e.target.value);
         });
 
-        // Bulk calculator
-        document.getElementById('btn-bulk-calculator').addEventListener('click', () => {
-            UI.showBulkCalculator(this.state.products);
-        });
-
-        document.getElementById('btn-calculate-bulk').addEventListener('click', () => {
-            this.calculateBulkOrder();
-        });
-
-        // Export buttons
-        document.getElementById('btn-export-data').addEventListener('click', () => {
-            UI.showModal('modal-export');
-        });
-
-        document.getElementById('btn-export-materials').addEventListener('click', () => {
-            this.exportMaterials();
-        });
-
-        document.getElementById('btn-export-products').addEventListener('click', () => {
-            this.exportProducts();
-        });
-
-        document.getElementById('btn-export-history').addEventListener('click', async () => {
-            await this.exportHistory();
-        });
-
-        document.getElementById('btn-export-all').addEventListener('click', async () => {
-            await this.exportAll();
-        });
-
-        // Reset history
-        document.getElementById('btn-reset-history').addEventListener('click', async () => {
-            await this.resetHistory();
-        });
-
-        // Sales Form
-        document.getElementById('btn-add-sale').addEventListener('click', () => {
-            document.getElementById('form-sale').reset();
-            document.getElementById('sale-id').value = '';
-            document.getElementById('modal-sale-title').textContent = 'Nueva Venta';
-            // Set today's date
-            document.getElementById('sale-date').valueAsDate = new Date();
-            // Populate products dropdown
-            const productSelect = document.getElementById('sale-product');
-            productSelect.innerHTML = '<option value="">Seleccionar producto...</option>';
-            this.state.products.forEach(product => {
-                const option = document.createElement('option');
-                option.value = product.id;
-                option.textContent = `${product.name} - $${product.price.toFixed(2)}`;
-                option.dataset.price = product.price;
-                option.dataset.cost = product.totalCost || 0;
-                productSelect.appendChild(option);
+        // Product Image
+        const productImageInput = document.getElementById('product-image');
+        if (productImageInput) {
+            productImageInput.addEventListener('change', (e) => {
+                this.handleImageUpload(e, 'product');
             });
+        }
+
+        const btnRemoveImage = document.getElementById('btn-remove-image');
+        if (btnRemoveImage) {
+            btnRemoveImage.addEventListener('click', () => {
+                this.removeProductImage();
+            });
+        }
+    },
+
+    setupSalesListeners(addListener) {
+        addListener('btn-add-sale', 'click', () => {
+            const formSale = document.getElementById('form-sale');
+            const saleId = document.getElementById('sale-id');
+            const modalTitle = document.getElementById('modal-sale-title');
+            const saleDate = document.getElementById('sale-date');
+            const productSelect = document.getElementById('sale-product');
+            
+            if (formSale) formSale.reset();
+            if (saleId) saleId.value = '';
+            if (modalTitle) modalTitle.textContent = 'Nueva Venta';
+            if (saleDate) saleDate.valueAsDate = new Date();
+            
+            if (productSelect) {
+                productSelect.innerHTML = '<option value="">Seleccionar producto...</option>';
+                this.state.products.forEach(product => {
+                    const option = document.createElement('option');
+                    option.value = product.id;
+                    option.textContent = `${product.name} - $${product.price.toFixed(2)}`;
+                    option.dataset.price = product.price;
+                    option.dataset.cost = product.totalCost || 0;
+                    productSelect.appendChild(option);
+                });
+            }
             UI.showModal('modal-sale');
         });
 
-        // Sale product change
-        document.getElementById('sale-product').addEventListener('change', (e) => {
+        addListener('sale-product', 'change', (e) => {
             const select = e.target;
             const selectedOption = select.options[select.selectedIndex];
+            const salePrice = document.getElementById('sale-price');
+            const suggestedPrice = document.getElementById('suggested-price');
+            
             if (selectedOption && selectedOption.dataset.price) {
-                document.getElementById('sale-price').value = selectedOption.dataset.price;
-                document.getElementById('suggested-price').textContent = `$${parseFloat(selectedOption.dataset.price).toFixed(2)}`;
+                if (salePrice) salePrice.value = selectedOption.dataset.price;
+                if (suggestedPrice) suggestedPrice.textContent = `$${parseFloat(selectedOption.dataset.price).toFixed(2)}`;
                 this.updateSaleTotal();
             }
         });
 
-        // Sale quantity or price change
-        document.getElementById('sale-quantity').addEventListener('input', () => {
+        addListener('sale-quantity', 'input', () => {
             this.updateSaleTotal();
         });
 
-        document.getElementById('sale-price').addEventListener('input', () => {
+        addListener('sale-price', 'input', () => {
             this.updateSaleTotal();
         });
 
-        document.getElementById('form-sale').addEventListener('submit', async (e) => {
+        addListener('form-sale', 'submit', async (e) => {
             e.preventDefault();
-            
             const submitBtn = e.target.querySelector('button[type="submit"]');
-            if (submitBtn.disabled) return;
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Guardando...';
+            if (submitBtn && submitBtn.disabled) return;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Guardando...';
+            }
             
             try {
                 await this.handleSaveSale();
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Registrar Venta';
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Registrar Venta';
+                }
             }
         });
 
-        // Sales search and filter
-        const searchSales = document.getElementById('search-sales');
-        if (searchSales) {
-            searchSales.addEventListener('input', () => {
-                this.filterSales();
-            });
-        }
+        addListener('search-sales', 'input', () => {
+            this.filterSales();
+        });
 
-        const filterSalesPeriod = document.getElementById('filter-sales-period');
-        if (filterSalesPeriod) {
-            filterSalesPeriod.addEventListener('change', () => {
-                this.filterSales();
-            });
-        }
+        addListener('filter-sales-period', 'change', () => {
+            this.filterSales();
+        });
     },
+
+    setupCommonListeners(addListener) {
+        addListener('btn-view-gallery', 'click', () => {
+            UI.showGallery(this.state.products);
+        });
+
+        addListener('btn-share-catalog', 'click', () => {
+            this.shareCatalog();
+        });
+
+        addListener('btn-print-catalog', 'click', () => {
+            this.printCatalog();
+        });
+
+        addListener('btn-bulk-calculator', 'click', () => {
+            UI.showBulkCalculator(this.state.products);
+        });
+
+        addListener('btn-calculate-bulk', 'click', () => {
+            this.calculateBulkOrder();
+        });
+
+        addListener('btn-export-data', 'click', () => {
+            UI.showModal('modal-export');
+        });
+
+        addListener('btn-export-materials', 'click', () => {
+            this.exportMaterials();
+        });
+
+        addListener('btn-export-products', 'click', () => {
+            this.exportProducts();
+        });
+
+        addListener('btn-export-history', 'click', async () => {
+            await this.exportHistory();
+        });
+
+        addListener('btn-export-all', 'click', async () => {
+            await this.exportAll();
+        });
+
+        addListener('btn-reset-history', 'click', async () => {
+            await this.resetHistory();
+        });
+    },
+
 
     setupSettingsListeners() {
         const btnOpenSettings = document.getElementById('btn-open-settings');

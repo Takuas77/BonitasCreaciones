@@ -267,13 +267,16 @@ const UI = {
         
         this.elements.materialsList.innerHTML = '';
         
+        console.log('🧹 Lista limpiada, agregando materiales...');
+        
         if (this.elements.recipeSelect) {
             this.elements.recipeSelect.innerHTML = '<option value="">Seleccionar Material...</option>';
         }
         
         if (this.elements.lowStockList) this.elements.lowStockList.innerHTML = '';
         let lowStock = 0;
-        materials.forEach(material => {
+        materials.forEach((material, index) => {
+            console.log(`➕ Agregando material ${index + 1}:`, material.name);
             const row = document.createElement('tr');
             const stockBadge = material.stock < 5 ? 'low' : 'ok';
             const categoryBadge = material.category || 'Otros';
@@ -308,6 +311,9 @@ const UI = {
                 }
             }
         });
+        
+        console.log(`✅ ${materials.length} materiales agregados al DOM`);
+        console.log('🔍 Filas en la tabla:', this.elements.materialsList.children.length);
         
         if (this.elements.lowStockCount) {
             this.elements.lowStockCount.textContent = lowStock;

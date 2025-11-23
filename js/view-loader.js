@@ -91,9 +91,16 @@ const ViewLoader = {
         // Remover clase hidden de la vista que se acaba de cargar
         const viewElement = this.containers.views.querySelector('.view');
         
+        console.log('🔍 ViewElement encontrado:', !!viewElement);
+        console.log('🔍 Clases antes:', viewElement?.className);
+        
         if (viewElement && viewElement.classList.contains('hidden')) {
             viewElement.classList.remove('hidden');
+            console.log('✅ Clase hidden removida');
         }
+        
+        console.log('🔍 Clases después:', viewElement?.className);
+        console.log('🔍 Display style:', viewElement ? window.getComputedStyle(viewElement).display : 'N/A');
 
         // Disparar evento personalizado para que otros módulos sepan que la vista cambió
         document.dispatchEvent(new CustomEvent('viewLoaded', { 

@@ -43,6 +43,9 @@ const ViewLoader = {
      */
     async loadView(viewName, showLoader = true) {
         try {
+            console.log(`📂 Cargando vista: ${viewName}`);
+            console.trace('Stack trace de loadView');
+            
             if (showLoader) this.showLoadingIndicator();
 
             // Verificar si está en caché

@@ -1,8 +1,46 @@
 # 🔧 Solución de Errores - Integración Supabase
 
-## ✅ Errores Corregidos
+## ⚠️ ESTE ARCHIVO ESTÁ OBSOLETO
 
-### 1. Error 400 en las consultas de Supabase
+**Por favor usa:** `DATABASE_SETUP.md` (en la raíz del proyecto)
+
+**SQL actualizado:** `supabase_schema_completo.sql`
+
+---
+
+## ✅ Cambios Importantes
+
+### Antes (Obsoleto):
+- SQL dividido en múltiples archivos
+- Sin tabla `user_profiles`
+- Sin soporte para login con username
+
+### Ahora (Nuevo):
+- ✅ **Un solo archivo SQL:** `supabase_schema_completo.sql`
+- ✅ **Tabla user_profiles:** Login con username o email
+- ✅ **RLS completo:** Cada usuario ve solo sus datos
+- ✅ **Historia y price_history:** Con user_id
+
+---
+
+## 🚀 Instrucciones Actualizadas
+
+Lee el archivo: **`DATABASE_SETUP.md`**
+
+Ejecuta: **`supabase_schema_completo.sql`**
+
+---
+
+## Resumen de lo que cambió:
+
+1. **user_profiles** - Nueva tabla para mapear username → email
+2. **history** - Ahora incluye `user_id`
+3. **price_history** - Ahora incluye `user_id`
+4. **Todas las políticas RLS** - Filtran por `auth.uid()`
+
+---
+
+
 **Causa:** Las tablas `materials` y `products` no existen en tu base de datos de Supabase.
 
 **Solución:** Ejecutar el SQL para crear las tablas (ver abajo).

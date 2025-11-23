@@ -6,16 +6,8 @@
     listenersInitialized: false, // Bandera para evitar duplicación de listeners
 
     async init() {
-        // Verificar si Supabase está disponible
         this.useSupabase = SUPABASE_CONFIG.useSupabase && supabaseClient !== null;
-        
-        if (this.useSupabase) {
-            console.log('🔐 Modo: Supabase Auth');
-        } else {
-            console.log('🔐 Modo: Local Storage Auth');
-        }
 
-        // Solo configurar listeners una vez
         if (!this.listenersInitialized) {
             this.setupAuthListeners();
             this.listenersInitialized = true;
@@ -79,13 +71,13 @@
                     });
                 
                 if (error) {
-                    console.error('Error al crear perfil automáticamente:', error);
+                    // Error silencioso
                 } else {
-                    console.log('✓ Perfil creado automáticamente para:', username);
+                    // Perfil creado
                 }
             }
         } catch (error) {
-            console.error('Error en ensureUserProfile:', error);
+            // Error silencioso
         }
     },
 
@@ -185,7 +177,6 @@
                 }, 500);
 
             } catch (error) {
-                console.error('Error en login:', error);
                 this.showMessage('Error al iniciar sesión', 'danger');
             }
         } else {
@@ -329,11 +320,10 @@
     async logout() {
         if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
             if (this.useSupabase) {
-                // Logout de Supabase
                 try {
                     await supabaseClient.auth.signOut();
                 } catch (error) {
-                    console.error('Error en logout:', error);
+                    // Error silencioso
                 }
             }
             

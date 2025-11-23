@@ -15,9 +15,7 @@ if (SUPABASE_CONFIG.useSupabase && typeof supabase !== 'undefined') {
             SUPABASE_CONFIG.url,
             SUPABASE_CONFIG.anonKey
         );
-        console.log('✓ Supabase inicializado correctamente');
     } catch (error) {
-        console.error('Error al inicializar Supabase:', error);
         SUPABASE_CONFIG.useSupabase = false;
     }
 }

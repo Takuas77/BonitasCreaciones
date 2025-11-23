@@ -12,12 +12,10 @@ const App = {
     async init() {
         // Evitar inicialización múltiple
         if (this.initialized) {
-            console.log('App ya inicializada, recargando datos...');
             await this.loadData();
             return;
         }
         
-        console.log('Inicializando App por primera vez...');
         UI.init();
         await this.loadData();
         this.setupEventListeners();
@@ -29,10 +27,9 @@ const App = {
         try {
             this.state.materials = await Storage.getMaterials();
             this.state.products = await Storage.getProducts();
-            this.state.history = await Storage.getHistory(); // Load history
+            this.state.history = await Storage.getHistory();
             this.refreshUI();
         } catch (error) {
-            console.error("Error loading data:", error);
             this.showNotification("Error al cargar datos", "error");
         }
     },
@@ -258,7 +255,6 @@ const App = {
             this.refreshUI();
             this.showNotification('Material guardado correctamente', 'success');
         } catch (e) {
-            console.error(e);
             this.showNotification('Error al guardar material', 'error');
         }
     },
@@ -496,7 +492,6 @@ const App = {
             this.refreshUI();
             this.showNotification('Producto guardado correctamente', 'success');
         } catch (e) {
-            console.error(e);
             this.showNotification('Error al guardar producto', 'error');
         }
     },

@@ -25,14 +25,10 @@ const Storage = {
                     .order('created_at', { ascending: false });
                 
                 if (error) {
-                    console.error('Error loading materials from Supabase:', error);
-                    console.log('Fallback a localStorage');
                     return this.getMaterialsLocal();
                 }
-                console.log('Materiales cargados desde Supabase:', data?.length || 0);
                 return data || [];
             } catch (error) {
-                console.error('Supabase connection error:', error);
                 return this.getMaterialsLocal();
             }
         }
@@ -45,9 +41,6 @@ const Storage = {
     },
     
     async saveMaterial(material) {
-        console.log('💾 Guardando material:', material.name, 'ID:', material.id);
-        
-        // Guardar en Supabase si está habilitado
         if (this.useSupabase) {
             try {
                 const materialData = {
@@ -56,29 +49,19 @@ const Storage = {
                     updated_at: new Date().toISOString()
                 };
 
-                console.log('📤 Enviando a Supabase:', materialData);
-                
                 const { data, error } = await supabaseClient
                     .from('materials')
                     .upsert(materialData, { onConflict: 'id' })
                     .select();
 
                 if (error) {
-                    console.error('Error saving to Supabase:', error);
-                    // Fallback a localStorage
                     return this.saveMaterialLocal(material);
                 }
                 
-                console.log('✅ Respuesta de Supabase:', data);
-                
-                // También guardar localmente como cache
                 this.saveMaterialLocal(material);
-                
                 const allMaterials = await this.getMaterials();
-                console.log('📦 Total de materiales después de guardar:', allMaterials.length);
                 return allMaterials;
             } catch (error) {
-                console.error('Supabase error:', error);
                 return this.saveMaterialLocal(material);
             }
         }
@@ -114,10 +97,10 @@ const Storage = {
                     .eq('user_id', Auth.currentUser.id);
 
                 if (error) {
-                    console.error('Error deleting from Supabase:', error);
+                    // Error silencioso
                 }
             } catch (error) {
-                console.error('Supabase error:', error);
+                // Error silencioso
             }
         }
         
@@ -134,18 +117,13 @@ const Storage = {
         const material = materials.find(m => m.id === materialId);
         
         if (!material) {
-            console.error('Material no encontrado:', materialId);
             return;
         }
         
-        // Actualizar el stock
         const newStock = material.stock - quantityUsed;
         const updatedMaterial = { ...material, stock: newStock };
         
-        // Guardar el material actualizado
         await this.saveMaterial(updatedMaterial);
-        
-        console.log(`✓ Stock actualizado: ${material.name} - Stock: ${newStock.toFixed(2)} ${material.unit}`);
     },
     
     // Products
@@ -159,12 +137,9 @@ const Storage = {
                     .order('created_at', { ascending: false });
                 
                 if (error) {
-                    console.error('Error loading products from Supabase:', error);
-                    console.log('Fallback a localStorage');
                     return this.getProductsLocal();
                 }
                 
-                // Calcular totalCost para cada producto basado en su receta
                 const materials = await this.getMaterials();
                 const productsWithCost = (data || []).map(product => {
                     let totalCost = 0;
@@ -179,10 +154,8 @@ const Storage = {
                     return { ...product, totalCost };
                 });
                 
-                console.log('Productos cargados desde Supabase:', productsWithCost.length);
                 return productsWithCost;
             } catch (error) {
-                console.error('Supabase connection error:', error);
                 return this.getProductsLocal();
             }
         }
@@ -195,11 +168,8 @@ const Storage = {
     },
     
     async saveProduct(product) {
-        console.log('💾 Guardando producto:', product.name, 'ID:', product.id);
-        
         if (this.useSupabase) {
             try {
-                // Preparar datos para Supabase (solo campos que existen en la tabla)
                 const productData = {
                     id: product.id,
                     user_id: Auth.currentUser.id,
@@ -208,32 +178,23 @@ const Storage = {
                     image: product.image || product.image_url || null,
                     margin: product.margin,
                     price: product.price,
-                    recipe: product.recipe, // JSONB en Supabase
+                    recipe: product.recipe,
                     updated_at: new Date().toISOString()
                 };
 
-                console.log('📤 Enviando producto a Supabase:', productData);
-
-                // Usar upsert sin onConflict (usa PRIMARY KEY automáticamente)
                 const { data, error } = await supabaseClient
                     .from('products')
                     .upsert(productData, { onConflict: 'id' })
                     .select();
 
                 if (error) {
-                    console.error('Error saving product to Supabase:', error);
-                    console.error('Detalles del error:', error.message, error.details, error.hint);
                     return this.saveProductLocal(product);
                 }
                 
-                console.log('✅ Producto guardado en Supabase:', data);
-                this.saveProductLocal(product); // También guardar localmente como backup
-                
+                this.saveProductLocal(product);
                 const allProducts = await this.getProducts();
-                console.log('📦 Total de productos después de guardar:', allProducts.length);
                 return allProducts;
             } catch (error) {
-                console.error('Supabase error:', error);
                 return this.saveProductLocal(product);
             }
         }
@@ -265,10 +226,10 @@ const Storage = {
                     .eq('user_id', Auth.currentUser.id);
 
                 if (error) {
-                    console.error('Error deleting product from Supabase:', error);
+                    // Error silencioso
                 }
             } catch (error) {
-                console.error('Supabase error:', error);
+                // Error silencioso
             }
         }
         
@@ -287,22 +248,18 @@ const Storage = {
                     .order('date', { ascending: false })
                     .limit(100);
                 
-                // Agregar filtro de user_id solo si la columna existe
                 try {
                     query = query.eq('user_id', Auth.currentUser.id);
                 } catch (e) {
-                    console.warn('⚠️ Tabla history sin user_id - usando sin filtro');
+                    // Sin user_id
                 }
                 
                 const { data, error } = await query;
                 
                 if (error) {
-                    console.error('Error loading history from Supabase:', error);
-                    console.warn('⚠️ IMPORTANTE: Necesitas ejecutar fix_history_table.sql en Supabase');
                     return this.getHistoryLocal();
                 }
                 
-                // Normalizar campos de snake_case a camelCase para compatibilidad
                 const normalizedData = (data || []).map(entry => ({
                     id: entry.id,
                     type: entry.type,
@@ -312,14 +269,11 @@ const Storage = {
                     salePrice: entry.sale_price,
                     profit: entry.profit,
                     date: entry.date,
-                    materialsUsed: entry.materials_used // Si existe
+                    materialsUsed: entry.materials_used
                 }));
                 
-                console.log('Historial cargado desde Supabase:', normalizedData.length);
                 return normalizedData;
             } catch (error) {
-                console.error('Supabase connection error:', error);
-                console.warn('⚠️ Usando localStorage como fallback');
                 return this.getHistoryLocal();
             }
         }
@@ -343,11 +297,10 @@ const Storage = {
                     date: new Date().toISOString()
                 };
 
-                // Intentar agregar user_id si la columna existe
                 try {
                     historyData.user_id = Auth.currentUser.id;
                 } catch (e) {
-                    console.warn('⚠️ Tabla history sin user_id');
+                    // Sin user_id
                 }
 
                 const { error } = await supabaseClient
@@ -355,13 +308,10 @@ const Storage = {
                     .insert(historyData);
 
                 if (error) {
-                    console.error('Error saving history to Supabase:', error);
-                    console.warn('⚠️ IMPORTANTE: Ejecuta fix_history_table.sql para corregir la tabla');
-                    // No fallar, continuar guardando en localStorage
+                    // Error silencioso
                 }
             } catch (error) {
-                console.error('Supabase error:', error);
-                console.warn('⚠️ Guardando solo en localStorage');
+                // Error silencioso
             }
         }
         

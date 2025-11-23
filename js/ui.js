@@ -21,9 +21,7 @@ const UI = {
     },
 
     init() {
-        // Evitar inicialización múltiple
         if (this.initialized) {
-            console.log('UI ya inicializada, saltando setup de listeners...');
             return;
         }
         
@@ -271,7 +269,6 @@ const UI = {
     showBulkCalculator(products) {
         const select = document.getElementById('bulk-product');
         if (!select) {
-            console.error('Elemento bulk-product no encontrado');
             return;
         }
         select.innerHTML = '<option value="">Seleccionar Producto...</option>';

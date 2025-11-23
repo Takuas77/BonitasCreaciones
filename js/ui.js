@@ -38,6 +38,9 @@ const UI = {
         const views = document.querySelectorAll('.view');
         navBtns.forEach(btn => {
             btn.addEventListener('click', () => {
+                // Ignorar si no tiene data-target (ej: botón logout)
+                if (!btn.dataset.target) return;
+                
                 navBtns.forEach(b => b.classList.remove('active'));
                 views.forEach(v => {
                     v.classList.remove('active');
@@ -45,8 +48,10 @@ const UI = {
                 });
                 btn.classList.add('active');
                 const targetView = document.getElementById(btn.dataset.target);
-                targetView.classList.remove('hidden');
-                targetView.classList.add('active');
+                if (targetView) {
+                    targetView.classList.remove('hidden');
+                    targetView.classList.add('active');
+                }
             });
         });
     },

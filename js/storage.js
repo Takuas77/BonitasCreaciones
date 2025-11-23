@@ -117,6 +117,26 @@ const Storage = {
         localStorage.setItem(this.KEYS.MATERIALS, JSON.stringify(materials));
         return materials;
     },
+
+    async updateMaterialStock(materialId, quantityUsed) {
+        // Obtener el material actual
+        const materials = await this.getMaterials();
+        const material = materials.find(m => m.id === materialId);
+        
+        if (!material) {
+            console.error('Material no encontrado:', materialId);
+            return;
+        }
+        
+        // Actualizar el stock
+        const newStock = material.stock - quantityUsed;
+        const updatedMaterial = { ...material, stock: newStock };
+        
+        // Guardar el material actualizado
+        await this.saveMaterial(updatedMaterial);
+        
+        console.log(`✓ Stock actualizado: ${material.name} - Stock: ${newStock.toFixed(2)} ${material.unit}`);
+    },
     
     // Products
     async getProducts() {
@@ -240,12 +260,63 @@ const Storage = {
         localStorage.setItem(this.KEYS.PRODUCTS, JSON.stringify(products));
         return products;
     },
-    getHistory() {
+    async getHistory() {
+        if (this.useSupabase) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('history')
+                    .select('*')
+                    .eq('user_id', Auth.currentUser.id)
+                    .order('date', { ascending: false })
+                    .limit(100);
+                
+                if (error) {
+                    console.error('Error loading history from Supabase:', error);
+                    return this.getHistoryLocal();
+                }
+                
+                console.log('Historial cargado desde Supabase:', data?.length || 0);
+                return data || [];
+            } catch (error) {
+                console.error('Supabase connection error:', error);
+                return this.getHistoryLocal();
+            }
+        }
+        return this.getHistoryLocal();
+    },
+
+    getHistoryLocal() {
         const data = localStorage.getItem(this.KEYS.HISTORY);
         return data ? JSON.parse(data) : [];
     },
-    addHistoryEntry(entry) {
-        const history = this.getHistory();
+    async addHistoryEntry(entry) {
+        if (this.useSupabase) {
+            try {
+                const historyData = {
+                    user_id: Auth.currentUser.id,
+                    type: entry.type || 'production',
+                    product_name: entry.productName,
+                    quantity: entry.quantity,
+                    total_cost: entry.totalCost || 0,
+                    sale_price: entry.salePrice || 0,
+                    profit: entry.profit || 0,
+                    date: new Date().toISOString()
+                };
+
+                const { error } = await supabaseClient
+                    .from('history')
+                    .insert(historyData);
+
+                if (error) {
+                    console.error('Error saving history to Supabase:', error);
+                }
+            } catch (error) {
+                console.error('Supabase error:', error);
+            }
+        }
+        
+        // También guardar en localStorage
+        const history = this.getHistoryLocal();
         history.unshift(entry);
         if (history.length > 100) {
             history.splice(100);
@@ -304,11 +375,11 @@ const Storage = {
         link.download = filename + '_' + new Date().toISOString().split('T')[0] + '.csv';
         link.click();
     },
-    exportAllData() {
+    async exportAllData() {
         const allData = {
-            materials: this.getMaterials(),
-            products: this.getProducts(),
-            history: this.getHistory(),
+            materials: await this.getMaterials(),
+            products: await this.getProducts(),
+            history: await this.getHistory(),
             priceHistory: this.getPriceHistory(),
             exportDate: new Date().toISOString()
         };

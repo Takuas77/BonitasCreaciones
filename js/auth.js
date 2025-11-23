@@ -23,6 +23,9 @@
             // Verificar sesión en Supabase
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
+                // Asegurar que el perfil existe en user_profiles
+                await this.ensureUserProfile(session.user);
+                
                 this.currentUser = {
                     id: session.user.id,
                     username: session.user.user_metadata?.username || session.user.email.split('@')[0],
@@ -43,6 +46,40 @@
             } else {
                 this.showLogin();
             }
+        }
+    },
+
+    async ensureUserProfile(user) {
+        try {
+            // Verificar si el perfil ya existe
+            const { data: existingProfile } = await supabaseClient
+                .from('user_profiles')
+                .select('id')
+                .eq('id', user.id)
+                .maybeSingle();
+            
+            // Si no existe, crearlo
+            if (!existingProfile) {
+                const username = user.user_metadata?.username || user.email.split('@')[0];
+                const name = user.user_metadata?.name || user.email.split('@')[0];
+                
+                const { error } = await supabaseClient
+                    .from('user_profiles')
+                    .insert({
+                        id: user.id,
+                        username: username,
+                        email: user.email,
+                        name: name
+                    });
+                
+                if (error) {
+                    console.error('Error al crear perfil automáticamente:', error);
+                } else {
+                    console.log('✓ Perfil creado automáticamente para:', username);
+                }
+            }
+        } catch (error) {
+            console.error('Error en ensureUserProfile:', error);
         }
     },
 
@@ -123,6 +160,9 @@
                         : error.message, 'danger');
                     return;
                 }
+
+                // Asegurar que el perfil existe
+                await this.ensureUserProfile(data.user);
 
                 this.currentUser = {
                     id: data.user.id,
@@ -211,22 +251,11 @@
         if (this.useSupabase) {
             // Registro con Supabase usando el email real
             try {
-                // Primero verificar si el username ya existe
-                const { data: existingProfile } = await supabaseClient
-                    .from('user_profiles')
-                    .select('username')
-                    .eq('username', username)
-                    .single();
-                
-                if (existingProfile) {
-                    this.showMessage('Este nombre de usuario ya está en uso', 'danger');
-                    return;
-                }
-
                 const { data, error } = await supabaseClient.auth.signUp({
                     email: email,
                     password: password,
                     options: {
+                        emailRedirectTo: 'https://takuas77.github.io/BonitasCreaciones/',
                         data: {
                             name: name,
                             username: username
@@ -235,6 +264,7 @@
                 });
 
                 if (error) {
+                    console.error('Error en signup:', error);
                     if (error.message.includes('already registered')) {
                         this.showMessage('Este email ya está registrado', 'danger');
                     } else {
@@ -243,24 +273,8 @@
                     return;
                 }
 
-                // Guardar perfil en la tabla user_profiles
-                if (data.user) {
-                    const { error: profileError } = await supabaseClient
-                        .from('user_profiles')
-                        .insert({
-                            id: data.user.id,
-                            username: username,
-                            email: email,
-                            name: name
-                        });
-                    
-                    if (profileError) {
-                        console.error('Error al crear perfil:', profileError);
-                        // No mostramos error al usuario porque el registro de auth fue exitoso
-                    }
-                }
-
-                this.showMessage('¡Cuenta creada! Ya puedes iniciar sesión con tu usuario o email', 'success');
+                // El perfil se creará automáticamente al hacer login la primera vez
+                this.showMessage('¡Cuenta creada! Revisa tu email para confirmar tu cuenta', 'success');
                 document.getElementById('register-form').reset();
                 
                 setTimeout(() => {

@@ -92,12 +92,24 @@
         }
 
         if (this.useSupabase) {
-            // Login con Supabase usando email
+            // Login con Supabase
             try {
-                // Si el usuario ingresó un username, asumimos que es el formato interno
                 let loginEmail = username;
+                
+                // Si no tiene @, buscar el email por username en la tabla user_profiles
                 if (!username.includes('@')) {
-                    loginEmail = `${username}@bonitascreaciones.local`;
+                    const { data: profileData, error: profileError } = await supabaseClient
+                        .from('user_profiles')
+                        .select('email')
+                        .eq('username', username)
+                        .single();
+                    
+                    if (profileError || !profileData) {
+                        this.showMessage('Usuario no encontrado', 'danger');
+                        return;
+                    }
+                    
+                    loginEmail = profileData.email;
                 }
                 
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -199,6 +211,18 @@
         if (this.useSupabase) {
             // Registro con Supabase usando el email real
             try {
+                // Primero verificar si el username ya existe
+                const { data: existingProfile } = await supabaseClient
+                    .from('user_profiles')
+                    .select('username')
+                    .eq('username', username)
+                    .single();
+                
+                if (existingProfile) {
+                    this.showMessage('Este nombre de usuario ya está en uso', 'danger');
+                    return;
+                }
+
                 const { data, error } = await supabaseClient.auth.signUp({
                     email: email,
                     password: password,
@@ -219,7 +243,24 @@
                     return;
                 }
 
-                this.showMessage('¡Cuenta creada! Revisa tu email para confirmar', 'success');
+                // Guardar perfil en la tabla user_profiles
+                if (data.user) {
+                    const { error: profileError } = await supabaseClient
+                        .from('user_profiles')
+                        .insert({
+                            id: data.user.id,
+                            username: username,
+                            email: email,
+                            name: name
+                        });
+                    
+                    if (profileError) {
+                        console.error('Error al crear perfil:', profileError);
+                        // No mostramos error al usuario porque el registro de auth fue exitoso
+                    }
+                }
+
+                this.showMessage('¡Cuenta creada! Ya puedes iniciar sesión con tu usuario o email', 'success');
                 document.getElementById('register-form').reset();
                 
                 setTimeout(() => {

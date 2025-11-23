@@ -88,6 +88,12 @@ const ViewLoader = {
         // Limpiar contenedor de vistas
         this.containers.views.innerHTML = html;
 
+        // Remover clase hidden de la vista que se acaba de cargar
+        const viewElement = this.containers.views.querySelector('.view');
+        if (viewElement && viewElement.classList.contains('hidden')) {
+            viewElement.classList.remove('hidden');
+        }
+
         // Disparar evento personalizado para que otros módulos sepan que la vista cambió
         document.dispatchEvent(new CustomEvent('viewLoaded', { 
             detail: { viewName } 

@@ -212,14 +212,19 @@
         } else {
             // Login local - puede usar username o email
             const users = this.getUsers();
+            console.log('Usuarios encontrados:', users);
             const user = users.find(u => u.username === username || u.email === username);
 
             if (!user) {
                 this.showMessage('Usuario o email no encontrado', 'danger');
+                console.log('Usuario no encontrado:', username);
                 return;
             }
 
-            if (user.password !== this.hashPassword(password)) {
+            const hashedPassword = this.hashPassword(password);
+            console.log('Password hasheado:', hashedPassword, 'vs', user.password);
+            
+            if (user.password !== hashedPassword) {
                 this.showMessage('Contraseña incorrecta', 'danger');
                 return;
             }
@@ -231,10 +236,12 @@
                 email: user.email
             };
             
+            console.log('Usuario autenticado:', this.currentUser);
             this.setLocalCurrentUser(this.currentUser);
             this.showMessage('¡Bienvenid@!', 'success');
             
             setTimeout(async () => {
+                console.log('Llamando a showApp...');
                 await this.showApp();
                 this.updateUserUI();
             }, 500);
@@ -430,20 +437,32 @@
     },
 
     async showApp() {
+        console.log('showApp llamado');
         const authScreen = document.getElementById('auth-screen') || document.querySelector('#auth-container #auth-screen');
+        console.log('Auth screen encontrado:', authScreen);
         if (authScreen) {
             authScreen.classList.add('hidden');
         }
         
-        document.querySelector('.app-container').classList.remove('hidden');
+        const appContainer = document.querySelector('.app-container');
+        console.log('App container encontrado:', appContainer);
+        if (appContainer) {
+            appContainer.classList.remove('hidden');
+        } else {
+            console.error('App container no encontrado');
+            return;
+        }
         
         // Cargar vista del dashboard
+        console.log('Cargando vista inicial...');
         await this.loadInitialView();
         
         // Inicializar la aplicación si no ha sido inicializada
         if (typeof App !== 'undefined' && App.init) {
+            console.log('Inicializando App...');
             await App.init();
         }
+        console.log('showApp completado');
     },
 
     async loadInitialView() {

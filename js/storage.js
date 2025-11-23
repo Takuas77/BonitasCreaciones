@@ -133,8 +133,24 @@ const Storage = {
                     console.log('Fallback a localStorage');
                     return this.getProductsLocal();
                 }
-                console.log('Productos cargados desde Supabase:', data?.length || 0);
-                return data || [];
+                
+                // Calcular totalCost para cada producto basado en su receta
+                const materials = await this.getMaterials();
+                const productsWithCost = (data || []).map(product => {
+                    let totalCost = 0;
+                    if (product.recipe && Array.isArray(product.recipe)) {
+                        product.recipe.forEach(ing => {
+                            const mat = materials.find(m => m.id === ing.materialId);
+                            if (mat) {
+                                totalCost += ing.quantity * mat.cost;
+                            }
+                        });
+                    }
+                    return { ...product, totalCost };
+                });
+                
+                console.log('Productos cargados desde Supabase:', productsWithCost.length);
+                return productsWithCost;
             } catch (error) {
                 console.error('Supabase connection error:', error);
                 return this.getProductsLocal();
@@ -151,22 +167,33 @@ const Storage = {
     async saveProduct(product) {
         if (this.useSupabase) {
             try {
+                // Preparar datos para Supabase (solo campos que existen en la tabla)
                 const productData = {
-                    ...product,
+                    id: product.id,
                     user_id: Auth.currentUser.id,
+                    name: product.name,
+                    category: product.category,
+                    image: product.image || product.image_url || null,
+                    margin: product.margin,
+                    price: product.price,
+                    recipe: product.recipe, // JSONB en Supabase
                     updated_at: new Date().toISOString()
                 };
 
-                const { error } = await supabaseClient
+                // Usar upsert sin onConflict (usa PRIMARY KEY automáticamente)
+                const { data, error } = await supabaseClient
                     .from('products')
-                    .upsert(productData, { onConflict: 'id' });
+                    .upsert(productData, { onConflict: 'id' })
+                    .select();
 
                 if (error) {
                     console.error('Error saving product to Supabase:', error);
+                    console.error('Detalles del error:', error.message, error.details, error.hint);
                     return this.saveProductLocal(product);
                 }
                 
-                this.saveProductLocal(product);
+                console.log('✓ Producto guardado en Supabase:', data);
+                this.saveProductLocal(product); // También guardar localmente como backup
                 return await this.getProducts();
             } catch (error) {
                 console.error('Supabase error:', error);

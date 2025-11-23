@@ -460,6 +460,7 @@ const App = {
 
         if (confirm('¿Estás seguro de eliminar este material?')) {
             this.state.materials = await Storage.deleteMaterial(id);
+            this.state.history = await Storage.getHistory(); // Recargar historial
             this.refreshUI();
             this.showNotification('Material eliminado correctamente', 'success');
         }
@@ -649,7 +650,9 @@ const App = {
     async deleteProduct(id) {
         if (confirm('¿Estás seguro de eliminar este producto?')) {
             this.state.products = await Storage.deleteProduct(id);
+            this.state.history = await Storage.getHistory(); // Recargar historial
             this.refreshUI();
+            this.showNotification('Producto eliminado correctamente', 'success');
         }
     },
 

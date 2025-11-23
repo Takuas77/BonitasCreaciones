@@ -65,11 +65,10 @@ const App = {
         // Configurar event listeners para la vista actual
         this.setupViewListeners(viewName);
         
-        // Renderizar datos según la vista
+        // Renderizar datos solo en la vista correspondiente
         switch(viewName) {
             case 'dashboard':
-                UI.renderMaterials(this.state.materials, this.state.history);
-                UI.renderProducts(this.state.products, this.state.materials);
+                // Solo métricas generales, no renderizar materiales ni productos aquí
                 break;
             case 'materials':
                 UI.renderMaterials(this.state.materials, this.state.history);

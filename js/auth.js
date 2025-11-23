@@ -337,6 +337,15 @@
                 }
             }
             
+            // Limpiar estado de la aplicación
+            if (typeof App !== 'undefined' && App.state) {
+                App.state.materials = [];
+                App.state.products = [];
+                App.state.history = [];
+                App.state.currentRecipe = [];
+                App.state.currentProductImage = '';
+            }
+            
             this.currentUser = null;
             localStorage.removeItem(this.CURRENT_USER_KEY);
             this.showMessage('Sesión cerrada', 'info');
@@ -385,9 +394,38 @@
         document.getElementById('auth-screen').classList.add('hidden');
         document.querySelector('.app-container').classList.remove('hidden');
         
+        // Resetear navegación al dashboard
+        this.resetNavigation();
+        
         // Inicializar la aplicación si no ha sido inicializada
         if (typeof App !== 'undefined' && App.init) {
             await App.init();
+        }
+    },
+
+    resetNavigation() {
+        // Resetear todos los botones de navegación
+        const navBtns = document.querySelectorAll('.nav-btn');
+        navBtns.forEach(btn => btn.classList.remove('active'));
+        
+        // Activar el botón del dashboard
+        const dashboardBtn = document.querySelector('.nav-btn[data-target="dashboard"]');
+        if (dashboardBtn) {
+            dashboardBtn.classList.add('active');
+        }
+        
+        // Ocultar todas las vistas
+        const views = document.querySelectorAll('.view');
+        views.forEach(v => {
+            v.classList.remove('active');
+            v.classList.add('hidden');
+        });
+        
+        // Mostrar solo el dashboard
+        const dashboardView = document.getElementById('dashboard');
+        if (dashboardView) {
+            dashboardView.classList.remove('hidden');
+            dashboardView.classList.add('active');
         }
     },
 

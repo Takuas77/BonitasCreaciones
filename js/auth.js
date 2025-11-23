@@ -124,18 +124,32 @@
     },
 
     showLoginForm() {
-        document.getElementById('login-form').classList.remove('hidden');
-        document.getElementById('register-form').classList.add('hidden');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        
+        if (loginForm) loginForm.classList.remove('hidden');
+        if (registerForm) registerForm.classList.add('hidden');
     },
 
     showRegisterForm() {
-        document.getElementById('login-form').classList.add('hidden');
-        document.getElementById('register-form').classList.remove('hidden');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        
+        if (loginForm) loginForm.classList.add('hidden');
+        if (registerForm) registerForm.classList.remove('hidden');
     },
 
     async handleLogin() {
-        const username = document.getElementById('login-username').value.trim();
-        const password = document.getElementById('login-password').value;
+        const usernameInput = document.getElementById('login-username');
+        const passwordInput = document.getElementById('login-password');
+        
+        if (!usernameInput || !passwordInput) {
+            console.error('Elementos del formulario de login no encontrados');
+            return;
+        }
+        
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
 
         if (!username || !password) {
             this.showMessage('Por favor completa todos los campos', 'danger');
@@ -228,11 +242,22 @@
     },
 
     async handleRegister() {
-        const name = document.getElementById('register-name').value.trim();
-        const email = document.getElementById('register-email').value.trim();
-        const username = document.getElementById('register-username').value.trim();
-        const password = document.getElementById('register-password').value;
-        const passwordConfirm = document.getElementById('register-password-confirm').value;
+        const nameInput = document.getElementById('register-name');
+        const emailInput = document.getElementById('register-email');
+        const usernameInput = document.getElementById('register-username');
+        const passwordInput = document.getElementById('register-password');
+        const passwordConfirmInput = document.getElementById('register-password-confirm');
+        
+        if (!nameInput || !emailInput || !usernameInput || !passwordInput || !passwordConfirmInput) {
+            console.error('Elementos del formulario de registro no encontrados');
+            return;
+        }
+        
+        const name = nameInput.value.trim();
+        const email = emailInput.value.trim();
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+        const passwordConfirm = passwordConfirmInput.value;
 
         if (!name || !email || !username || !password || !passwordConfirm) {
             this.showMessage('Por favor completa todos los campos', 'danger');
@@ -392,8 +417,16 @@
     },
 
     showLogin() {
-        document.getElementById('auth-screen').classList.remove('hidden');
-        document.querySelector('.app-container').classList.add('hidden');
+        const authScreen = document.getElementById('auth-screen');
+        const appContainer = document.querySelector('.app-container');
+        
+        if (authScreen) {
+            authScreen.classList.remove('hidden');
+        }
+        
+        if (appContainer) {
+            appContainer.classList.add('hidden');
+        }
     },
 
     async showApp() {

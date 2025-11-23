@@ -154,24 +154,39 @@ const App = {
     },
 
     setupSettingsListeners() {
-        document.getElementById('btn-open-settings').addEventListener('click', () => {
-            document.getElementById('supabase-url').value = localStorage.getItem('supabase_url') || '';
-            document.getElementById('supabase-key').value = localStorage.getItem('supabase_key') || '';
-            UI.showModal('modal-settings');
-        });
+        const btnOpenSettings = document.getElementById('btn-open-settings');
+        if (btnOpenSettings) {
+            btnOpenSettings.addEventListener('click', () => {
+                const urlInput = document.getElementById('supabase-url');
+                const keyInput = document.getElementById('supabase-key');
+                if (urlInput) urlInput.value = localStorage.getItem('supabase_url') || '';
+                if (keyInput) keyInput.value = localStorage.getItem('supabase_key') || '';
+                UI.showModal('modal-settings');
+            });
+        }
 
-        document.getElementById('form-settings').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const url = document.getElementById('supabase-url').value;
-            const key = document.getElementById('supabase-key').value;
-            SupabaseClient.saveCredentials(url, key);
-        });
+        const formSettings = document.getElementById('form-settings');
+        if (formSettings) {
+            formSettings.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const url = document.getElementById('supabase-url').value;
+                const key = document.getElementById('supabase-key').value;
+                if (typeof SupabaseClient !== 'undefined') {
+                    SupabaseClient.saveCredentials(url, key);
+                }
+            });
+        }
 
-        document.getElementById('btn-disconnect').addEventListener('click', () => {
-            if (confirm('¿Desconectar de Supabase? Volverás a usar el almacenamiento local.')) {
-                SupabaseClient.clearCredentials();
-            }
-        });
+        const btnDisconnect = document.getElementById('btn-disconnect');
+        if (btnDisconnect) {
+            btnDisconnect.addEventListener('click', () => {
+                if (confirm('¿Desconectar de Supabase? Volverás a usar el almacenamiento local.')) {
+                    if (typeof SupabaseClient !== 'undefined') {
+                        SupabaseClient.clearCredentials();
+                    }
+                }
+            });
+        }
     },
 
     // Material Actions

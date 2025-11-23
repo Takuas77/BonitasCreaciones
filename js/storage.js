@@ -21,12 +21,15 @@ const Storage = {
                 const { data, error } = await supabaseClient
                     .from('materials')
                     .select('*')
-                    .eq('user_id', Auth.currentUser.id);
+                    .eq('user_id', Auth.currentUser.id)
+                    .order('created_at', { ascending: false });
                 
                 if (error) {
                     console.error('Error loading materials from Supabase:', error);
+                    console.log('Fallback a localStorage');
                     return this.getMaterialsLocal();
                 }
+                console.log('Materiales cargados desde Supabase:', data?.length || 0);
                 return data || [];
             } catch (error) {
                 console.error('Supabase connection error:', error);
@@ -122,12 +125,15 @@ const Storage = {
                 const { data, error } = await supabaseClient
                     .from('products')
                     .select('*')
-                    .eq('user_id', Auth.currentUser.id);
+                    .eq('user_id', Auth.currentUser.id)
+                    .order('created_at', { ascending: false });
                 
                 if (error) {
                     console.error('Error loading products from Supabase:', error);
+                    console.log('Fallback a localStorage');
                     return this.getProductsLocal();
                 }
+                console.log('Productos cargados desde Supabase:', data?.length || 0);
                 return data || [];
             } catch (error) {
                 console.error('Supabase connection error:', error);

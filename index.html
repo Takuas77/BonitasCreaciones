@@ -12,9 +12,61 @@
 </head>
 
 <body>
+    <!-- Auth Screen -->
+    <div id="auth-screen" class="auth-container">
+        <div class="auth-blobs">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+            <div class="blob blob-3"></div>
+        </div>
+        
+        <div class="auth-card glass-panel">
+            <div class="auth-logo">
+               <img src="images/logo.png" alt="Bonitas Creaciones" class="logo">
+            </div>
 
-    <div id="auth-screen" class="auth-container hidden">
-        <!-- Formularios de login/registro -->
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form">
+                <h2>Iniciar Sesión</h2>
+                <div class="form-group">
+                    <label>Usuario o Email</label>
+                    <input type="text" id="login-username" required placeholder="Tu usuario o email">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="login-password" required placeholder="Tu contraseña">
+                </div>
+                <button type="submit" class="action-btn primary full-width">Entrar</button>
+                <p class="auth-toggle">¿No tienes cuenta? <a href="#" id="show-register">Regístrate aquí</a></p>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" class="auth-form hidden">
+                <h2>Crear Cuenta</h2>
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="register-name" required placeholder="Tu nombre">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="register-email" required placeholder="tu@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" id="register-username" required placeholder="Elige un nombre de usuario">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="register-password" required placeholder="Mínimo 6 caracteres">
+                </div>
+                <div class="form-group">
+                    <label>Confirmar Contraseña</label>
+                    <input type="password" id="register-password-confirm" required placeholder="Confirma tu contraseña">
+                </div>
+                <button type="submit" class="action-btn primary full-width">Crear Cuenta</button>
+                <p class="auth-toggle">¿Ya tienes cuenta? <a href="#" id="show-login">Inicia sesión aquí</a></p>
+            </form>
+        </div>
     </div>
 
     <div class="background-blobs">
@@ -36,10 +88,7 @@
                 <button class="nav-btn active" data-target="dashboard">Dashboard</button>
                 <button class="nav-btn" data-target="materials">Materiales</button>
                 <button class="nav-btn" data-target="products">Productos</button>
-                <button class="nav-btn" id="btn-open-settings" title="Configuración">⚙️</button>
-                <div id="db-status-indicator"
-                    style="width: 10px; height: 10px; border-radius: 50%; background-color: #f87171; margin-left: 10px;"
-                    title="Desconectado"></div>
+                <button class="nav-btn logout-btn" id="btn-logout" title="Cerrar Sesión">🚪 Salir</button>
             </nav>
         </header>
 
@@ -399,7 +448,7 @@
 
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase-client.js"></script>
+    <script src="js/supabase-config.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/auth.js"></script>

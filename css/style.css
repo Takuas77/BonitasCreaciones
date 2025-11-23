@@ -756,6 +756,39 @@ small {
     transition: transform 0.3s ease;
 }
 
+/* Notifications */
+.notification {
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-weight: 600;
+    z-index: 10000;
+    transition: top 0.3s ease;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.notification.show {
+    top: 20px;
+}
+
+.notification-success {
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    color: white;
+}
+
+.notification-danger {
+    background: linear-gradient(135deg, #f87171, #ef4444);
+    color: white;
+}
+
+.notification-info {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    color: white;
+}
+
 .product-card:hover .product-image img {
     transform: scale(1.05);
 }
@@ -786,3 +819,15 @@ small {
     align-items: center;
     min-height: 100vh;
 }
+
+                    .auth-logo {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        margin-bottom: 2rem;
+                    }
+                    
+                    .auth-logo .logo {
+                        width: 150px;
+                        height: auto;
+                    }

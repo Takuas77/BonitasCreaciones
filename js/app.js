@@ -734,5 +734,9 @@ const App = {
 // Start App
 document.addEventListener('DOMContentLoaded', () => {
     window.App = App; // Expose to window for onclick handlers
-    App.init();
+    // App.init() is called by Auth after successful login
+    // Only load data if already authenticated
+    if (Auth && Auth.currentUser) {
+        App.init();
+    }
 });

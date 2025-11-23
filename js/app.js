@@ -35,16 +35,23 @@ const App = {
             this.state.products = await Storage.getProducts();
             this.state.history = await Storage.getHistory();
             this.state.sales = await Sales.getSales();
-            this.refreshUI();
+            // No llamar refreshUI aquí, se llamará cuando se cargue cada vista
         } catch (error) {
             this.showNotification("Error al cargar datos", "error");
         }
     },
 
     refreshUI() {
-        UI.renderMaterials(this.state.materials, this.state.history); // Pass history
-        UI.renderProducts(this.state.products, this.state.materials);
-        UI.renderSales(this.state.sales);
+        // Solo renderizar si los elementos existen en el DOM
+        if (UI.elements.materialsList) {
+            UI.renderMaterials(this.state.materials, this.state.history);
+        }
+        if (UI.elements.productsList) {
+            UI.renderProducts(this.state.products, this.state.materials);
+        }
+        if (document.getElementById('sales-list')) {
+            UI.renderSales(this.state.sales);
+        }
     },
 
     /**

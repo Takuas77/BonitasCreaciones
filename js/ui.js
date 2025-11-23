@@ -58,6 +58,7 @@ const UI = {
      * Actualiza las referencias a elementos del DOM después de cargar una vista
      */
     refreshElementReferences() {
+        console.log('🔄 Actualizando referencias de elementos del DOM...');
         this.elements.materialsList = document.getElementById('materials-list');
         this.elements.productsList = document.getElementById('products-list');
         this.elements.recipeList = document.getElementById('recipe-list');
@@ -72,6 +73,10 @@ const UI = {
         this.elements.topConsumedList = document.getElementById('top-consumed-list');
         this.elements.modals.material = document.getElementById('modal-material');
         this.elements.modals.product = document.getElementById('modal-product');
+        console.log('🔍 Elementos encontrados:', {
+            materialsList: this.elements.materialsList,
+            productsList: this.elements.productsList
+        });
     },
 
     async setupNavigation() {

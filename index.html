@@ -23,6 +23,12 @@
 <body>
     <!-- Auth Container - Cargado dinámicamente -->
     <div id="auth-container"></div>
+    
+    <!-- Loading Overlay -->
+    <div id="app-loading-overlay" class="view-loader hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 9999; display: flex;">
+        <div class="loader-spinner"></div>
+        <p>Cargando datos...</p>
+    </div>
 
     <div class="background-blobs">
         <div class="blob blob-1"></div>

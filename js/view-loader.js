@@ -31,8 +31,6 @@ const ViewLoader = {
             document.body.appendChild(modalsContainer);
             this.containers.modals = modalsContainer;
         }
-
-        console.log('✅ ViewLoader inicializado');
     },
 
     /**
@@ -64,7 +62,6 @@ const ViewLoader = {
 
             if (showLoader) this.hideLoadingIndicator();
             
-            console.log(`✅ Vista cargada: ${viewName}`);
             return true;
 
         } catch (error) {
@@ -126,11 +123,8 @@ const ViewLoader = {
             const html = await response.text();
             this.cache.modals[modalName] = html;
             this.renderModal(modalName);
-
-            console.log(`✅ Modal cargado: ${modalName}`);
-            return true;
-
-        } catch (error) {
+            
+            return true;        } catch (error) {
             console.error(`❌ Error cargando modal ${modalName}:`, error);
             this.showError(`No se pudo cargar el modal: ${modalName}`);
             return false;
@@ -179,12 +173,8 @@ const ViewLoader = {
             'settings-modal'
         ];
 
-        console.log('⏳ Cargando modales...');
-
         const promises = modals.map(modal => this.loadModal(modal));
         await Promise.all(promises);
-
-        console.log('✅ Todos los modales cargados');
     },
 
     /**
@@ -208,7 +198,6 @@ const ViewLoader = {
             }
 
             this.containers.auth.innerHTML = html;
-            console.log('✅ Vista de autenticación cargada');
             
             // Disparar evento para que Auth pueda configurar listeners
             document.dispatchEvent(new CustomEvent('authViewLoaded'));
@@ -263,7 +252,6 @@ const ViewLoader = {
     clearCache() {
         this.cache.views = {};
         this.cache.modals = {};
-        console.log('🗑️ Caché limpiado');
     },
 
     /**
@@ -271,13 +259,10 @@ const ViewLoader = {
      */
     async preloadCommonViews() {
         const commonViews = ['dashboard', 'materials', 'products', 'sales'];
-        console.log('⏳ Precargando vistas comunes...');
         
         for (const view of commonViews) {
             await this.loadView(view, false);
         }
-        
-        console.log('✅ Vistas comunes precargadas');
     }
 };
 

@@ -448,13 +448,35 @@
             return;
         }
         
-        // Inicializar la aplicación primero (para cargar datos)
-        if (typeof App !== 'undefined' && App.init) {
-            await App.init();
-        }
+        // Mostrar loader
+        this.showLoadingOverlay();
         
-        // Luego cargar vista del dashboard con datos ya cargados
-        await this.loadInitialView();
+        try {
+            // Inicializar la aplicación primero (para cargar datos)
+            if (typeof App !== 'undefined' && App.init) {
+                await App.init();
+            }
+            
+            // Luego cargar vista del dashboard con datos ya cargados
+            await this.loadInitialView();
+        } finally {
+            // Ocultar loader
+            this.hideLoadingOverlay();
+        }
+    },
+    
+    showLoadingOverlay() {
+        const overlay = document.getElementById('app-loading-overlay');
+        if (overlay) {
+            overlay.classList.remove('hidden');
+        }
+    },
+    
+    hideLoadingOverlay() {
+        const overlay = document.getElementById('app-loading-overlay');
+        if (overlay) {
+            overlay.classList.add('hidden');
+        }
     },
 
     async loadInitialView() {

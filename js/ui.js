@@ -38,7 +38,6 @@ const UI = {
      */
     setupViewLoadedListener() {
         document.addEventListener('viewLoaded', (e) => {
-            console.log('Vista cargada:', e.detail.viewName);
             this.currentView = e.detail.viewName;
             this.refreshElementReferences();
             
@@ -49,7 +48,6 @@ const UI = {
         });
 
         document.addEventListener('modalLoaded', (e) => {
-            console.log('Modal cargado:', e.detail.modalName);
             this.setupModals(); // Re-configurar event listeners de modales
         });
     },

@@ -285,8 +285,21 @@ const Storage = {
                     return this.getHistoryLocal();
                 }
                 
-                console.log('Historial cargado desde Supabase:', data?.length || 0);
-                return data || [];
+                // Normalizar campos de snake_case a camelCase para compatibilidad
+                const normalizedData = (data || []).map(entry => ({
+                    id: entry.id,
+                    type: entry.type,
+                    productName: entry.product_name,
+                    quantity: entry.quantity,
+                    totalCost: entry.total_cost,
+                    salePrice: entry.sale_price,
+                    profit: entry.profit,
+                    date: entry.date,
+                    materialsUsed: entry.materials_used // Si existe
+                }));
+                
+                console.log('Historial cargado desde Supabase:', normalizedData.length);
+                return normalizedData;
             } catch (error) {
                 console.error('Supabase connection error:', error);
                 console.warn('⚠️ Usando localStorage como fallback');

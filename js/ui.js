@@ -319,5 +319,61 @@ const UI = {
         }
 
         this.showModal('modal-gallery');
+    },
+
+    renderSales(sales) {
+        const salesList = document.getElementById('sales-list');
+        if (!salesList) return;
+
+        if (sales.length === 0) {
+            salesList.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 40px; color: var(--text-muted);">No hay ventas registradas aún</td></tr>';
+            this.updateSalesStats([]);
+            return;
+        }
+
+        salesList.innerHTML = '';
+        sales.forEach(sale => {
+            const row = document.createElement('tr');
+            const date = new Date(sale.date);
+            const formattedDate = date.toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
+            
+            row.innerHTML = `
+                <td>${formattedDate}</td>
+                <td>${sale.product_name}</td>
+                <td>${sale.customer || '-'}</td>
+                <td>${sale.quantity}</td>
+                <td>$${sale.unit_price.toFixed(2)}</td>
+                <td><strong>$${sale.total.toFixed(2)}</strong></td>
+                <td>$${sale.cost.toFixed(2)}</td>
+                <td class="success">$${sale.profit.toFixed(2)}</td>
+                <td>
+                    <button class="action-btn danger delete-btn" data-id="${sale.id}" onclick="App.deleteSale('${sale.id}')">Eliminar</button>
+                </td>
+            `;
+            salesList.appendChild(row);
+        });
+
+        this.updateSalesStats(sales);
+    },
+
+    updateSalesStats(sales) {
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        
+        // Filter sales for this month
+        const monthSales = sales.filter(sale => {
+            const saleDate = new Date(sale.date);
+            return saleDate >= monthStart;
+        });
+
+        const monthCount = monthSales.length;
+        const monthRevenue = monthSales.reduce((sum, sale) => sum + (sale.total || 0), 0);
+        const monthProfit = monthSales.reduce((sum, sale) => sum + (sale.profit || 0), 0);
+        const totalCount = sales.length;
+
+        document.getElementById('sales-month-count').textContent = monthCount;
+        document.getElementById('sales-month-revenue').textContent = `$${monthRevenue.toFixed(2)}`;
+        document.getElementById('sales-month-profit').textContent = `$${monthProfit.toFixed(2)}`;
+        document.getElementById('sales-total-count').textContent = totalCount;
     }
 };

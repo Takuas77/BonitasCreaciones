@@ -2,6 +2,9 @@
 
 **Calculadora de Costos & Inventario para Emprendimientos**
 
+**Versión**: 2.0 (con Módulo de Ventas)  
+**Fecha**: 23 de noviembre de 2025
+
 ---
 
 ## 📖 Tabla de Contenidos
@@ -13,8 +16,9 @@
 5. [Estructura de Base de Datos](#estructura-de-base-de-datos)
 6. [Sistema de Autenticación](#sistema-de-autenticación)
 7. [Uso de la Aplicación](#uso-de-la-aplicación)
-8. [Solución de Problemas](#solución-de-problemas)
-9. [Desarrollo y Mantenimiento](#desarrollo-y-mantenimiento)
+8. [Módulo de Ventas](#módulo-de-ventas)
+9. [Solución de Problemas](#solución-de-problemas)
+10. [Desarrollo y Mantenimiento](#desarrollo-y-mantenimiento)
 
 ---
 
@@ -25,7 +29,9 @@
 - 💰 Calculadora de costos de producción
 - 📦 Control de inventario de materiales
 - 🏷️ Gestión de productos con recetas
-- 📊 Historial de producción y ventas
+- � **Módulo de ventas completo (NUEVO)**
+- �📊 Historial de producción y ventas
+- 📈 Estadísticas y reportes
 - 🔐 Sistema de autenticación seguro
 - ☁️ Sincronización con Supabase (opcional)
 
@@ -54,6 +60,7 @@
 - ✅ Unidades de medida con conversión
 - ✅ Historial de cambios de precio
 - ✅ Búsqueda y filtrado
+- ✅ Alertas de stock bajo
 
 ### 🏷️ Gestión de Productos
 - ✅ Crear productos con recetas
@@ -63,12 +70,21 @@
 - ✅ Compartir catálogo
 - ✅ Categorías personalizadas
 
-### 📊 Producción y Ventas
+### � Gestión de Ventas (NUEVO)
+- ✅ Registrar ventas con información completa
+- ✅ Cálculo automático de totales y ganancias
+- ✅ Filtrado por período (hoy, semana, mes, año)
+- ✅ Búsqueda por producto o cliente
+- ✅ Estadísticas en tiempo real
+- ✅ Historial completo de ventas
+- ✅ Análisis de rentabilidad
+
+### 📊 Producción y Reportes
 - ✅ Registrar producción (descuenta stock)
-- ✅ Registrar ventas
 - ✅ Historial completo
 - ✅ Estadísticas de ganancias
-- ✅ Exportar datos a JSON
+- ✅ Exportar datos a JSON/CSV
+- ✅ Dashboard con métricas clave
 
 ### 🎨 Interfaz
 - ✅ Diseño glassmorphism
@@ -124,21 +140,24 @@ https://takuas77.github.io/BonitasCreaciones/
 BonitasCreaciones/
 ├── index.html              # Página principal
 ├── manifest.json           # PWA config
+├── README.md               # Descripción del proyecto
 ├── css/
 │   └── style.css          # Estilos completos
 ├── js/
 │   ├── app.js             # Lógica principal
 │   ├── ui.js              # Renderizado UI
 │   ├── storage.js         # Persistencia de datos
+│   ├── sales.js           # Módulo de ventas (NUEVO) ⭐
 │   ├── auth.js            # Autenticación
+│   ├── supabase-client.js # Cliente Supabase
 │   └── supabase-config.js # Configuración Supabase
 ├── images/
 │   ├── logo.png           # Logo del emprendimiento
 │   └── BonitasCreaciones.ico  # Favicon
-├── doc/                   # Documentación (obsoleta)
-├── supabase_schema_completo.sql    # Schema de BD ⭐
-├── supabase_migracion.sql          # Migración de datos
-└── DATABASE_SETUP.md              # Este archivo ⭐
+├── database/
+│   └── migracion_completa.sql  # Schema completo con ventas ⭐
+└── doc/
+    └── DOCUMENTACION.md   # Esta documentación completa ⭐
 ```
 
 ---
@@ -213,11 +232,11 @@ const SUPABASE_CONFIG = {
 
 1. Ve a **SQL Editor** en Supabase
 2. Click en **New Query**
-3. Abre el archivo `supabase_schema_completo.sql` de tu proyecto
+3. Abre el archivo `database/migracion_completa.sql` de tu proyecto
 4. **Copia TODO el contenido**
 5. Pega en el SQL Editor
 6. Click en **Run** (o `Ctrl + Enter`)
-7. Deberías ver: ✅ `Schema completo creado exitosamente!`
+7. Deberías ver: ✅ `Migración completa finalizada exitosamente!`
 
 El SQL crea estas tablas:
 - ✅ `user_profiles` - Perfiles de usuario (username → email)
@@ -225,6 +244,7 @@ El SQL crea estas tablas:
 - ✅ `products` - Productos con recetas
 - ✅ `history` - Historial de producción/ventas
 - ✅ `price_history` - Cambios de precio
+- ✅ `sales` - Registro de ventas (NUEVO) ⭐
 
 ---
 
@@ -232,22 +252,27 @@ El SQL crea estas tablas:
 
 Si ya tienes usuarios registrados:
 
-1. Abre `supabase_migracion.sql`
-2. Ejecuta la sección **"2. Crear perfiles para usuarios existentes"**:
+1. El script `migracion_completa.sql` incluye la migración automática
+2. Ejecuta esta query para verificar:
 
 ```sql
 -- Ver usuarios registrados
 SELECT id, email, raw_user_meta_data FROM auth.users;
 
--- Crear perfiles automáticamente
+-- Ver perfiles creados
+SELECT * FROM user_profiles;
+```
+
+3. Si necesitas crear un perfil manualmente:
+
+```sql
 INSERT INTO user_profiles (id, username, email, name)
-SELECT 
-    id,
-    COALESCE(raw_user_meta_data->>'username', split_part(email, '@', 1)) as username,
-    email,
-    COALESCE(raw_user_meta_data->>'name', split_part(email, '@', 1)) as name
-FROM auth.users
-WHERE id NOT IN (SELECT id FROM user_profiles);
+VALUES (
+    'TU_USER_ID_AQUI',
+    'tu_username',
+    'tu@email.com',
+    'Tu Nombre'
+);
 ```
 
 ---
@@ -255,7 +280,13 @@ WHERE id NOT IN (SELECT id FROM user_profiles);
 ### ✅ PASO 7: Verificar Instalación
 
 1. Ve a **Table Editor** en Supabase
-2. Verifica que existan las 5 tablas
+2. Verifica que existan las 6 tablas:
+   - user_profiles
+   - materials
+   - products
+   - history
+   - price_history
+   - sales ⭐ (NUEVA)
 3. Abre tu app: https://takuas77.github.io/BonitasCreaciones/
 4. Abre la consola (F12)
 5. Deberías ver:
@@ -266,8 +297,10 @@ WHERE id NOT IN (SELECT id FROM user_profiles);
 6. Crea una cuenta nueva
 7. Inicia sesión con username o email
 8. Crea un material de prueba
-9. Recarga la página (F5)
-10. ✅ El material debería seguir ahí
+9. Crea un producto
+10. Registra una venta de prueba ⭐
+11. Recarga la página (F5)
+12. ✅ Todos los datos deberían estar ahí
 
 ---
 
@@ -282,6 +315,7 @@ user_profiles (username → email mapping)
     ↓
     ├── materials (materiales del usuario)
     ├── products (productos del usuario)
+    ├── sales (ventas del usuario) ⭐ NUEVO
     ├── history (historial del usuario)
     └── price_history (cambios de precio del usuario)
 ```
@@ -411,6 +445,40 @@ CREATE TABLE price_history (
     date TIMESTAMPTZ DEFAULT NOW()
 );
 ```
+
+---
+
+### Tabla: sales (NUEVA) ⭐
+
+Registro completo de ventas de productos.
+
+```sql
+CREATE TABLE sales (
+    id TEXT PRIMARY KEY,                    -- ID único de la venta
+    user_id UUID NOT NULL,                  -- FK → auth.users(id)
+    product_id TEXT NOT NULL,               -- ID del producto vendido
+    product_name TEXT NOT NULL,             -- Nombre del producto
+    customer TEXT,                          -- Nombre del cliente (opcional)
+    quantity NUMERIC(10,2) NOT NULL,        -- Cantidad vendida
+    unit_price NUMERIC(10,2) NOT NULL,      -- Precio unitario de venta
+    total NUMERIC(10,2) NOT NULL,           -- Total (quantity × unit_price)
+    cost NUMERIC(10,2) NOT NULL,            -- Costo de producción
+    profit NUMERIC(10,2) NOT NULL,          -- Ganancia (total - cost)
+    date DATE NOT NULL,                     -- Fecha de la venta
+    notes TEXT,                             -- Notas adicionales
+    created_at TIMESTAMPTZ DEFAULT NOW(),   -- Fecha de creación
+    updated_at TIMESTAMPTZ DEFAULT NOW()    -- Fecha de actualización
+);
+```
+
+**Índices:**
+- `idx_sales_user_id` - Para búsquedas por usuario
+- `idx_sales_date` - Para filtrar por fecha
+- `idx_sales_product_id` - Para análisis por producto
+
+**RLS Policies:**
+- ✅ Cada usuario solo ve sus propias ventas
+- ✅ Solo el dueño puede crear/modificar/eliminar
 
 ---
 
@@ -635,7 +703,154 @@ Al registrarse, se crean dos registros:
 
 ---
 
-## 🐛 Solución de Problemas
+## � Módulo de Ventas
+
+### Descripción General
+
+El módulo de ventas te permite registrar y gestionar todas las ventas de tus productos, calculando automáticamente costos, ganancias y proporcionando estadísticas detalladas.
+
+### Características Principales
+
+✅ **Registro de Ventas Completo**
+- Producto vendido (con precio sugerido)
+- Cantidad vendida
+- Cliente (opcional)
+- Fecha de venta
+- Precio unitario personalizable
+- Notas adicionales
+
+✅ **Cálculos Automáticos**
+- Total de la venta (cantidad × precio)
+- Costo de producción (basado en receta)
+- Ganancia (total - costo)
+
+✅ **Estadísticas en Tiempo Real**
+- Ventas del mes (cantidad)
+- Ingresos del mes
+- Ganancia del mes
+- Total histórico de ventas
+
+✅ **Filtros y Búsqueda**
+- Por período: Hoy, Esta semana, Este mes, Este año, Todas
+- Por producto o cliente
+
+### Cómo Registrar una Venta
+
+1. **Acceder al módulo:**
+   - Click en la pestaña "**Ventas**" en el menú principal
+
+2. **Registrar nueva venta:**
+   - Click en "**Registrar Venta**"
+   - Selecciona el **producto** del desplegable
+   - El **precio se autocompleta** con el del producto
+   - Ingresa la **cantidad** vendida
+   - (Opcional) Ingresa nombre del **cliente**
+   - Selecciona la **fecha** de venta
+   - (Opcional) Ajusta el precio si hubo descuento/aumento
+   - (Opcional) Agrega **notas** adicionales
+   - Verás en tiempo real:
+     - **Costo Total**: Cuánto costó producir
+     - **Ganancia Estimada**: Cuánto ganarás
+
+3. **Confirmar:**
+   - Click en "**Registrar Venta**"
+   - La venta aparecerá en la tabla
+   - Las estadísticas se actualizan automáticamente
+
+### Visualizar Ventas
+
+1. **Tabla de ventas:**
+   - Muestra todas las ventas con:
+     - Fecha
+     - Producto
+     - Cliente
+     - Cantidad
+     - Precio Unitario
+     - Total
+     - Costo
+     - Ganancia
+     - Botón para eliminar
+
+2. **Filtrar ventas:**
+   - Usa el **selector de período**:
+     - Hoy
+     - Esta semana
+     - Este mes (por defecto)
+     - Este año
+     - Todas las ventas
+   
+3. **Buscar ventas:**
+   - Usa la **barra de búsqueda**
+   - Busca por nombre de producto o cliente
+
+### Análisis de Rentabilidad
+
+El módulo calcula automáticamente:
+
+**Por cada venta:**
+- **Costo**: Basado en la receta del producto
+- **Ganancia**: Total - Costo
+- **Margen**: (Ganancia / Costo) × 100
+
+**Estadísticas del mes:**
+- **Ventas realizadas**: Cantidad total de ventas
+- **Ingresos**: Suma de todos los totales
+- **Ganancia**: Suma de todas las ganancias
+
+### Ejemplos de Uso
+
+**Ejemplo 1: Venta Normal**
+```
+Producto: Cartuchera Rosa
+Cantidad: 2
+Precio: $500 c/u
+Total: $1,000
+Costo: $600 (2 × $300)
+Ganancia: $400
+```
+
+**Ejemplo 2: Venta con Descuento**
+```
+Producto: Neceser Grande
+Cantidad: 1
+Precio original: $800
+Precio con descuento: $700
+Total: $700
+Costo: $450
+Ganancia: $250
+```
+
+**Ejemplo 3: Venta al Por Mayor**
+```
+Producto: Mochila Escolar
+Cantidad: 10
+Precio: $1,200 c/u
+Cliente: Escuela Primavera
+Total: $12,000
+Costo: $7,000
+Ganancia: $5,000
+```
+
+### Integración con Productos
+
+- Al seleccionar un producto, el precio se autocompleta
+- El costo se calcula automáticamente según la receta
+- Los materiales NO se descuentan del stock (usa "Producción" para eso)
+
+### Almacenamiento
+
+Las ventas se guardan en:
+- **localStorage** (modo local)
+- **Tabla `sales`** en Supabase (modo nube)
+- Sincronización automática si Supabase está configurado
+
+### Exportar Ventas
+
+Próximamente: Exportar ventas a CSV/Excel para análisis externo.
+
+---
+
+## �🐛 Solución de Problemas
 
 ### Problemas de Login
 

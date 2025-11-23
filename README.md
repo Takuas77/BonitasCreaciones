@@ -1,10 +1,11 @@
 # 🎒 Bonitas Creaciones - Calculadora de Costos
 
-**Aplicación web completa para gestión de costos, producción e inventario de emprendimientos**
+**Aplicación web completa para gestión de costos, producción, inventario y ventas**
 
 [![Deploy](https://img.shields.io/badge/deploy-GitHub%20Pages-green)](https://takuas77.github.io/BonitasCreaciones/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Supabase](https://img.shields.io/badge/backend-Supabase-green)](https://supabase.com)
+[![Version](https://img.shields.io/badge/version-2.0-blue)](https://github.com/Takuas77/BonitasCreaciones)
 
 ---
 
@@ -16,11 +17,20 @@
 
 ## ✨ Características Destacadas
 
+### Core
 - 🔐 **Autenticación completa** - Login con username o email
 - 💰 **Calculadora de costos** - Calcula automáticamente el costo de producción
-- 📦 **Control de inventario** - Gestiona stock de materiales
+- 📦 **Control de inventario** - Gestiona stock de materiales con alertas
 - 🏷️ **Gestión de productos** - Crea productos con recetas personalizadas
-- 📊 **Historial completo** - Producción, ventas y cambios de precio
+
+### Nuevo en v2.0 ⭐
+- 💵 **Módulo de Ventas** - Registra y gestiona todas tus ventas
+- � **Estadísticas en tiempo real** - Ventas, ingresos y ganancias del mes
+- 🔍 **Filtros avanzados** - Por período, producto o cliente
+- 💹 **Análisis de rentabilidad** - Costo, ganancia y margen por venta
+
+### Otras Funcionalidades
+- �📊 **Historial completo** - Producción, ventas y cambios de precio
 - 🎨 **Galería de productos** - Imágenes y catálogo compartible
 - ☁️ **Sincronización en la nube** - Datos seguros en Supabase
 - 📱 **Responsive** - Funciona en móvil, tablet y desktop
@@ -29,14 +39,15 @@
 
 ## 📚 Documentación
 
-**[📖 Ver Documentación Completa](DOCUMENTACION_COMPLETA.md)**
+**[📖 Ver Documentación Completa](doc/DOCUMENTACION.md)**
 
-La documentación completa incluye:
+La documentación unificada incluye:
 - ✅ Guía de instalación y configuración
 - ✅ Configuración de Supabase paso a paso
-- ✅ Estructura de base de datos
+- ✅ Estructura completa de base de datos (incluye tabla `sales`)
 - ✅ Sistema de autenticación
-- ✅ Guía de uso completa
+- ✅ Guía de uso de todos los módulos
+- ✅ **Módulo de Ventas - Guía completa** ⭐
 - ✅ Solución de problemas
 - ✅ Guía de desarrollo
 
@@ -69,11 +80,11 @@ Para sincronización en la nube:
 
 1. Crea cuenta en [Supabase](https://supabase.com)
 2. Crea un nuevo proyecto (GRATIS)
-3. Ejecuta el SQL: `supabase_schema_completo.sql`
+3. Ejecuta el SQL: `database/migracion_completa.sql` ⭐
 4. Configura credenciales en `js/supabase-config.js`
 5. Cambia `useSupabase: true`
 
-**[📖 Guía completa de configuración](DOCUMENTACION_COMPLETA.md#configuración-de-supabase)**
+**[📖 Guía completa de configuración](doc/DOCUMENTACION.md#configuración-de-supabase)**
 
 ---
 
@@ -95,12 +106,20 @@ Para sincronización en la nube:
 - Compartir catálogo
 - Categorías personalizadas
 
-### 📊 Producción y Ventas
+### � Ventas (NUEVO v2.0) ⭐
+- Registrar ventas con todos los detalles
+- Cálculo automático de totales y ganancias
+- Estadísticas en tiempo real (ventas, ingresos, ganancia del mes)
+- Filtros por período (hoy, semana, mes, año)
+- Búsqueda por producto o cliente
+- Análisis de rentabilidad por venta
+
+### �📊 Producción y Reportes
 - Registrar producción (descuenta stock automáticamente)
-- Registrar ventas
-- Historial completo
+- Historial completo de producción y ventas
 - Estadísticas de ganancias
-- Exportar datos a JSON
+- Exportar datos a JSON/CSV
+- Dashboard con métricas clave
 
 ### 🔐 Autenticación
 - Registro de usuarios con email
@@ -127,7 +146,6 @@ Para sincronización en la nube:
 BonitasCreaciones/
 ├── index.html                      # Página principal
 ├── manifest.json                   # PWA config
-├── DOCUMENTACION_COMPLETA.md      # 📖 Documentación unificada
 ├── README.md                       # Este archivo
 ├── css/
 │   └── style.css                  # Estilos completos
@@ -135,13 +153,17 @@ BonitasCreaciones/
 │   ├── app.js                     # Lógica principal
 │   ├── ui.js                      # Renderizado UI
 │   ├── storage.js                 # Persistencia de datos
+│   ├── sales.js                   # Módulo de ventas ⭐
 │   ├── auth.js                    # Autenticación
+│   ├── supabase-client.js         # Cliente Supabase
 │   └── supabase-config.js         # Configuración Supabase
 ├── images/
 │   ├── logo.png                   # Logo
 │   └── BonitasCreaciones.ico      # Favicon
-├── supabase_schema_completo.sql   # Schema de BD
-└── supabase_migracion.sql         # Migración de datos
+├── database/
+│   └── migracion_completa.sql     # 📖 Schema completo (incluye ventas) ⭐
+└── doc/
+    └── DOCUMENTACION.md           # 📖 Documentación completa unificada ⭐
 ```
 
 ---

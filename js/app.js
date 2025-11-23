@@ -4,6 +4,7 @@ const App = {
     state: {
         materials: [],
         products: [],
+        sales: [],
         history: [], // Added history to state
         currentRecipe: [], // Temporary state for creating/editing product
         currentProductImage: '', // Temporary state for product image
@@ -33,6 +34,7 @@ const App = {
             this.state.materials = await Storage.getMaterials();
             this.state.products = await Storage.getProducts();
             this.state.history = await Storage.getHistory();
+            this.state.sales = await Sales.getSales();
             this.refreshUI();
         } catch (error) {
             this.showNotification("Error al cargar datos", "error");
@@ -42,6 +44,7 @@ const App = {
     refreshUI() {
         UI.renderMaterials(this.state.materials, this.state.history); // Pass history
         UI.renderProducts(this.state.products, this.state.materials);
+        UI.renderSales(this.state.sales);
     },
 
     setupEventListeners() {
@@ -213,6 +216,78 @@ const App = {
         document.getElementById('btn-reset-history').addEventListener('click', async () => {
             await this.resetHistory();
         });
+
+        // Sales Form
+        document.getElementById('btn-add-sale').addEventListener('click', () => {
+            document.getElementById('form-sale').reset();
+            document.getElementById('sale-id').value = '';
+            document.getElementById('modal-sale-title').textContent = 'Nueva Venta';
+            // Set today's date
+            document.getElementById('sale-date').valueAsDate = new Date();
+            // Populate products dropdown
+            const productSelect = document.getElementById('sale-product');
+            productSelect.innerHTML = '<option value="">Seleccionar producto...</option>';
+            this.state.products.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.id;
+                option.textContent = `${product.name} - $${product.price.toFixed(2)}`;
+                option.dataset.price = product.price;
+                option.dataset.cost = product.totalCost || 0;
+                productSelect.appendChild(option);
+            });
+            UI.showModal('modal-sale');
+        });
+
+        // Sale product change
+        document.getElementById('sale-product').addEventListener('change', (e) => {
+            const select = e.target;
+            const selectedOption = select.options[select.selectedIndex];
+            if (selectedOption && selectedOption.dataset.price) {
+                document.getElementById('sale-price').value = selectedOption.dataset.price;
+                document.getElementById('suggested-price').textContent = `$${parseFloat(selectedOption.dataset.price).toFixed(2)}`;
+                this.updateSaleTotal();
+            }
+        });
+
+        // Sale quantity or price change
+        document.getElementById('sale-quantity').addEventListener('input', () => {
+            this.updateSaleTotal();
+        });
+
+        document.getElementById('sale-price').addEventListener('input', () => {
+            this.updateSaleTotal();
+        });
+
+        document.getElementById('form-sale').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            if (submitBtn.disabled) return;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Guardando...';
+            
+            try {
+                await this.handleSaveSale();
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Registrar Venta';
+            }
+        });
+
+        // Sales search and filter
+        const searchSales = document.getElementById('search-sales');
+        if (searchSales) {
+            searchSales.addEventListener('input', () => {
+                this.filterSales();
+            });
+        }
+
+        const filterSalesPeriod = document.getElementById('filter-sales-period');
+        if (filterSalesPeriod) {
+            filterSalesPeriod.addEventListener('change', () => {
+                this.filterSales();
+            });
+        }
     },
 
     setupSettingsListeners() {
@@ -960,6 +1035,94 @@ const App = {
         setTimeout(() => {
             window.print();
         }, 500);
+    },
+
+    // Sales Functions
+    updateSaleTotal() {
+        const quantity = parseFloat(document.getElementById('sale-quantity').value) || 0;
+        const price = parseFloat(document.getElementById('sale-price').value) || 0;
+        const total = quantity * price;
+        
+        document.getElementById('sale-total').value = total.toFixed(2);
+        
+        // Calculate cost and profit
+        const productSelect = document.getElementById('sale-product');
+        const selectedOption = productSelect.options[productSelect.selectedIndex];
+        if (selectedOption && selectedOption.dataset.cost) {
+            const unitCost = parseFloat(selectedOption.dataset.cost) || 0;
+            const totalCost = quantity * unitCost;
+            const profit = total - totalCost;
+            
+            document.getElementById('sale-cost-total').textContent = `$${totalCost.toFixed(2)}`;
+            document.getElementById('sale-profit').textContent = `$${profit.toFixed(2)}`;
+        }
+    },
+
+    async handleSaveSale() {
+        const productSelect = document.getElementById('sale-product');
+        const selectedOption = productSelect.options[productSelect.selectedIndex];
+        
+        if (!selectedOption || !selectedOption.value) {
+            this.showNotification('Por favor selecciona un producto', 'error');
+            return;
+        }
+
+        const product = this.state.products.find(p => p.id === selectedOption.value);
+        if (!product) {
+            this.showNotification('Producto no encontrado', 'error');
+            return;
+        }
+
+        const quantity = parseFloat(document.getElementById('sale-quantity').value);
+        const price = parseFloat(document.getElementById('sale-price').value);
+        const total = quantity * price;
+        const cost = quantity * (product.totalCost || 0);
+        const profit = total - cost;
+
+        const sale = {
+            id: document.getElementById('sale-id').value || 'sale_' + Date.now(),
+            product_id: product.id,
+            product_name: product.name,
+            customer: document.getElementById('sale-customer').value || '',
+            quantity: quantity,
+            unit_price: price,
+            total: total,
+            cost: cost,
+            profit: profit,
+            date: document.getElementById('sale-date').value,
+            notes: document.getElementById('sale-notes').value || '',
+            created_at: new Date().toISOString()
+        };
+
+        try {
+            await Sales.saveSale(sale);
+            this.state.sales = await Sales.getSales();
+            UI.renderSales(this.state.sales);
+            this.showNotification('Venta registrada exitosamente', 'success');
+            UI.hideModal('modal-sale');
+        } catch (error) {
+            this.showNotification('Error al guardar la venta', 'error');
+        }
+    },
+
+    async deleteSale(id) {
+        if (confirm('¿Estás seguro de eliminar esta venta?')) {
+            try {
+                await Sales.deleteSale(id);
+                this.state.sales = await Sales.getSales();
+                UI.renderSales(this.state.sales);
+                this.showNotification('Venta eliminada', 'success');
+            } catch (error) {
+                this.showNotification('Error al eliminar venta', 'error');
+            }
+        }
+    },
+
+    filterSales() {
+        const searchTerm = document.getElementById('search-sales').value;
+        const period = document.getElementById('filter-sales-period').value;
+        const filteredSales = Sales.filterSales(this.state.sales, searchTerm, period);
+        UI.renderSales(filteredSales);
     }
 };
 

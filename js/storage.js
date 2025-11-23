@@ -1,12 +1,13 @@
-const Storage = {
+﻿const Storage = {
     KEYS: {
         MATERIALS: 'cost_calculator_materials',
         PRODUCTS: 'cost_calculator_products',
         HISTORY: 'cost_calculator_history',
-        PRICE_HISTORY: 'cost_calculator_price_history'
+        PRICE_HISTORY: 'cost_calculator_price_history',
+        SALES: 'cost_calculator_sales'
     },
 
-    // Verificar si Supabase está habilitado y el usuario autenticado
+    // Verificar si Supabase estÃ¡ habilitado y el usuario autenticado
     get useSupabase() {
         return SUPABASE_CONFIG.useSupabase && 
                supabaseClient && 
@@ -104,7 +105,7 @@ const Storage = {
             }
         }
         
-        // También eliminar de localStorage
+        // TambiÃ©n eliminar de localStorage
         let materials = this.getMaterialsLocal();
         materials = materials.filter(m => m.id !== id);
         localStorage.setItem(this.KEYS.MATERIALS, JSON.stringify(materials));
@@ -315,7 +316,7 @@ const Storage = {
             }
         }
         
-        // También guardar en localStorage
+        // TambiÃ©n guardar en localStorage
         const history = this.getHistoryLocal();
         history.unshift(entry);
         if (history.length > 100) {
@@ -410,5 +411,98 @@ const Storage = {
             console.error('Error importing data:', error);
             return false;
         }
+    }
+,
+
+    // Sales
+    async getSales() {
+        if (this.useSupabase) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('sales')
+                    .select('*')
+                    .eq('user_id', Auth.currentUser.id)
+                    .order('date', { ascending: false });
+                
+                if (error) {
+                    return this.getSalesLocal();
+                }
+                return data || [];
+            } catch (error) {
+                return this.getSalesLocal();
+            }
+        }
+        return this.getSalesLocal();
+    },
+
+    getSalesLocal() {
+        const data = localStorage.getItem(this.KEYS.SALES);
+        return data ? JSON.parse(data) : [];
+    },
+
+    async saveSale(sale) {
+        if (this.useSupabase) {
+            try {
+                const saleData = {
+                    ...sale,
+                    user_id: Auth.currentUser.id,
+                    updated_at: new Date().toISOString()
+                };
+
+                const { data, error } = await supabaseClient
+                    .from('sales')
+                    .upsert(saleData, { onConflict: 'id' })
+                    .select();
+
+                if (error) {
+                    return this.saveSaleLocal(sale);
+                }
+                
+                this.saveSaleLocal(sale);
+                const allSales = await this.getSales();
+                return allSales;
+            } catch (error) {
+                return this.saveSaleLocal(sale);
+            }
+        }
+        
+        return this.saveSaleLocal(sale);
+    },
+
+    saveSaleLocal(sale) {
+        const sales = this.getSalesLocal();
+        const index = sales.findIndex(s => s.id === sale.id);
+        
+        if (index >= 0) {
+            sales[index] = sale;
+        } else {
+            sales.push(sale);
+        }
+        
+        localStorage.setItem(this.KEYS.SALES, JSON.stringify(sales));
+        return sales;
+    },
+
+    async deleteSale(id) {
+        if (this.useSupabase) {
+            try {
+                const { error } = await supabaseClient
+                    .from('sales')
+                    .delete()
+                    .eq('id', id)
+                    .eq('user_id', Auth.currentUser.id);
+
+                if (error) {
+                    // Error silencioso
+                }
+            } catch (error) {
+                // Error silencioso
+            }
+        }
+        
+        let sales = this.getSalesLocal();
+        sales = sales.filter(s => s.id !== id);
+        localStorage.setItem(this.KEYS.SALES, JSON.stringify(sales));
+        return sales;
     }
 };

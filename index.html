@@ -97,6 +97,7 @@
                 <button class="nav-btn active" data-target="dashboard">Dashboard</button>
                 <button class="nav-btn" data-target="materials">Materiales</button>
                 <button class="nav-btn" data-target="products">Productos</button>
+                <button class="nav-btn" data-target="sales">Ventas</button>
                 <button class="nav-btn logout-btn" id="btn-logout" title="Cerrar Sesión">Salir</button>
             </nav>
         </header>
@@ -231,6 +232,71 @@
                     </div>
                     <div class="products-grid" id="products-list">
                         <!-- Product cards will be injected here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sales View -->
+            <section id="sales" class="view hidden">
+                <div class="glass-panel">
+                    <div class="section-header">
+                        <h2>Ventas</h2>
+                        <button id="btn-add-sale" class="action-btn primary">Registrar Venta</button>
+                    </div>
+                    
+                    <!-- Resumen de Ventas -->
+                    <div class="stats-grid" style="margin-bottom: 24px;">
+                        <div class="stat-item">
+                            <span class="stat-label">Ventas del Mes</span>
+                            <span class="stat-value" id="sales-month-count">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Ingresos del Mes</span>
+                            <span class="stat-value success" id="sales-month-revenue">$0.00</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Ganancia del Mes</span>
+                            <span class="stat-value success" id="sales-month-profit">$0.00</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Ventas</span>
+                            <span class="stat-value" id="sales-total-count">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <input type="text" id="search-sales" placeholder="Buscar por producto o cliente..."
+                            style="max-width: 300px;">
+                        <select id="filter-sales-period" style="max-width: 200px;">
+                            <option value="all">Todas las ventas</option>
+                            <option value="today">Hoy</option>
+                            <option value="week">Esta semana</option>
+                            <option value="month" selected>Este mes</option>
+                            <option value="year">Este año</option>
+                        </select>
+                    </div>
+
+                    <!-- Lista de Ventas -->
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Producto</th>
+                                    <th>Cliente</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Total</th>
+                                    <th>Costo</th>
+                                    <th>Ganancia</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sales-list">
+                                <!-- Sales rows will be injected here -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -382,6 +448,65 @@
         </div>
     </div>
 
+    <!-- Sales Modal -->
+    <div id="modal-sale" class="modal hidden">
+        <div class="modal-content glass-panel">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-sale-title">Nueva Venta</h2>
+            <form id="form-sale">
+                <input type="hidden" id="sale-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Producto</label>
+                        <select id="sale-product" required>
+                            <option value="">Seleccionar producto...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Cantidad</label>
+                        <input type="number" id="sale-quantity" step="1" min="1" value="1" required placeholder="1">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cliente (opcional)</label>
+                        <input type="text" id="sale-customer" placeholder="Nombre del cliente">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" id="sale-date" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Precio Unitario ($)</label>
+                        <input type="number" id="sale-price" step="0.01" min="0" required placeholder="0.00">
+                        <small style="color: var(--text-muted); font-size: 0.8rem;">Precio sugerido: <span id="suggested-price">$0.00</span></small>
+                    </div>
+                    <div class="form-group">
+                        <label>Total ($)</label>
+                        <input type="number" id="sale-total" step="0.01" readonly placeholder="0.00" style="background: var(--glass-bg); cursor: not-allowed;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notas (opcional)</label>
+                    <textarea id="sale-notes" rows="3" placeholder="Detalles adicionales..."></textarea>
+                </div>
+                <div class="cost-summary">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Costo Total:</span>
+                        <strong id="sale-cost-total">$0.00</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; color: var(--success);">
+                        <span>Ganancia Estimada:</span>
+                        <strong id="sale-profit">$0.00</strong>
+                    </div>
+                </div>
+                <button type="submit" class="action-btn primary full-width">Registrar Venta</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Bulk Order Calculator Modal -->
     <div id="modal-bulk" class="modal hidden">
         <div class="modal-content glass-panel large">
@@ -471,6 +596,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/storage.js"></script>
+    <script src="js/sales.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>

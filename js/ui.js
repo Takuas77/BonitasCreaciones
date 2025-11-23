@@ -211,12 +211,12 @@ const UI = {
     },
 
     renderDashboardMetrics(materials, history = []) {
-        // If history is not passed, try to get it from storage (fallback, though deprecated in new flow)
-        if (!history || history.length === 0) {
-            // In async flow, we expect history to be passed. If not, we show 0.
-            // We avoid calling Storage.getHistory() here to prevent async issues in sync render.
-        }
-
+        console.log('📊 renderDashboardMetrics llamado:', {
+            materiales: materials.length,
+            historial: history.length
+        });
+        
+        // Calcular estadísticas de ventas y costos del historial
         let sales = 0;
         let costs = 0;
         const consumptionMap = {};
@@ -230,12 +230,70 @@ const UI = {
             }
         });
         const profit = sales - costs;
-        if (this.elements.totalSales) this.elements.totalSales.textContent = '$' + sales.toFixed(2);
-        if (this.elements.totalCosts) this.elements.totalCosts.textContent = '$' + costs.toFixed(2);
+        
+        // Actualizar ventas totales
+        if (this.elements.totalSales) {
+            this.elements.totalSales.textContent = '$' + sales.toFixed(2);
+            console.log('✅ Total ventas actualizado:', sales.toFixed(2));
+        }
+        
+        // Actualizar costos totales
+        if (this.elements.totalCosts) {
+            this.elements.totalCosts.textContent = '$' + costs.toFixed(2);
+            console.log('✅ Total costos actualizado:', costs.toFixed(2));
+        }
+        
+        // Actualizar ganancia neta
         if (this.elements.totalProfit) {
             this.elements.totalProfit.textContent = '$' + profit.toFixed(2);
             this.elements.totalProfit.className = profit >= 0 ? 'stat-value success' : 'stat-value warning';
+            console.log('✅ Ganancia actualizada:', profit.toFixed(2));
         }
+        
+        // Actualizar contador de productos (necesitamos acceder a App.state.products)
+        if (this.elements.totalProductsCount && window.App && window.App.state) {
+            this.elements.totalProductsCount.textContent = window.App.state.products.length;
+            console.log('✅ Total productos actualizado:', window.App.state.products.length);
+        }
+        
+        // Calcular materiales con stock bajo
+        let lowStock = 0;
+        if (this.elements.lowStockList) {
+            this.elements.lowStockList.innerHTML = '';
+        }
+        
+        materials.forEach(material => {
+            if (material.stock < 5) {
+                lowStock++;
+                if (this.elements.lowStockList) {
+                    const li = document.createElement('li');
+                    li.className = 'stock-item low';
+                    li.innerHTML = '<span>' + material.name + '</span><span class="stock-value">' + parseFloat(material.stock).toFixed(2) + ' ' + material.unit + '</span>';
+                    this.elements.lowStockList.appendChild(li);
+                }
+            }
+        });
+        
+        // Actualizar contador de materiales bajos
+        if (this.elements.lowStockCount) {
+            this.elements.lowStockCount.textContent = lowStock;
+            console.log('✅ Materiales con stock bajo:', lowStock);
+        }
+        
+        // Mostrar alerta si hay materiales con stock bajo
+        if (this.elements.lowStockAlert) {
+            if (lowStock > 0) {
+                const alertDiv = document.createElement('div');
+                alertDiv.style.cssText = 'background: rgba(245, 158, 11, 0.2); color: var(--warning); padding: 10px; border-radius: 8px; margin-bottom: 10px;';
+                alertDiv.textContent = '⚠️ Tienes ' + lowStock + ' materiales con stock bajo.';
+                this.elements.lowStockAlert.innerHTML = '';
+                this.elements.lowStockAlert.appendChild(alertDiv);
+            } else {
+                this.elements.lowStockAlert.innerHTML = '';
+            }
+        }
+        
+        // Actualizar lista de materiales más consumidos
         if (this.elements.topConsumedList) {
             this.elements.topConsumedList.innerHTML = '';
             const sortedConsumption = Object.entries(consumptionMap).sort(([, a], [, b]) => b - a).slice(0, 5);
@@ -251,6 +309,7 @@ const UI = {
             if (sortedConsumption.length === 0) {
                 this.elements.topConsumedList.innerHTML = '<li class="stock-item" style="color: var(--text-muted); justify-content: center;">Sin datos aún</li>';
             }
+            console.log('✅ Top 5 materiales consumidos actualizado');
         }
     },
 

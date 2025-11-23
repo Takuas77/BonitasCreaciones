@@ -76,7 +76,9 @@ const App = {
         // Renderizar datos solo en la vista correspondiente
         switch(viewName) {
             case 'dashboard':
-                // Solo métricas generales, no renderizar materiales ni productos aquí
+                console.log('🎨 Renderizando dashboard...');
+                // Renderizar métricas del dashboard
+                UI.renderDashboardMetrics(this.state.materials, this.state.history);
                 break;
             case 'materials':
                 console.log('🎨 Renderizando materiales...', this.state.materials.length);

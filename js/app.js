@@ -1,4 +1,6 @@
 const App = {
+    initialized: false, // Bandera para evitar inicialización múltiple
+    
     state: {
         materials: [],
         products: [],
@@ -8,10 +10,19 @@ const App = {
     },
 
     async init() {
+        // Evitar inicialización múltiple
+        if (this.initialized) {
+            console.log('App ya inicializada, recargando datos...');
+            await this.loadData();
+            return;
+        }
+        
+        console.log('Inicializando App por primera vez...');
         UI.init();
         await this.loadData();
         this.setupEventListeners();
         this.setupSettingsListeners();
+        this.initialized = true;
     },
 
     async loadData() {

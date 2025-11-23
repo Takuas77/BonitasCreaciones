@@ -121,12 +121,9 @@
 
                 this.showMessage('¡Bienvenid@!', 'success');
                 
-                setTimeout(() => {
-                    this.showApp();
+                setTimeout(async () => {
+                    await this.showApp();
                     this.updateUserUI();
-                    if (window.App) {
-                        App.init();
-                    }
                 }, 500);
 
             } catch (error) {
@@ -158,12 +155,9 @@
             this.setLocalCurrentUser(this.currentUser);
             this.showMessage('¡Bienvenid@!', 'success');
             
-            setTimeout(() => {
-                this.showApp();
+            setTimeout(async () => {
+                await this.showApp();
                 this.updateUserUI();
-                if (window.App) {
-                    App.init();
-                }
             }, 500);
         }
     },
@@ -326,9 +320,14 @@
         document.querySelector('.app-container').classList.add('hidden');
     },
 
-    showApp() {
+    async showApp() {
         document.getElementById('auth-screen').classList.add('hidden');
         document.querySelector('.app-container').classList.remove('hidden');
+        
+        // Inicializar la aplicación si no ha sido inicializada
+        if (typeof App !== 'undefined' && App.init) {
+            await App.init();
+        }
     },
 
     updateUserUI() {
